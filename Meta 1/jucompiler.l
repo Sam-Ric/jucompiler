@@ -8,7 +8,9 @@
     #include <string.h>
     int line_count = 1;
     int col_count = 1;
+    int comment_line, comment_col;
     char string_buffer[1024];
+    int string_line, string_col;
 
     int print = 0;
     void handle_token(char* token, int yyleng) {
@@ -18,11 +20,14 @@
     }
 
 %}
-digit       [0-9]
-identifier  [a-zA-Z][a-zA-Z0-9]*
+natural     (0|([1-9][0-9_]*[0-9])|[1-9])
+integer     [0-9][0-9]*[0-9]|[0-9]
+exponent    [eE][+-]?{integer}
+decimal     ({integer}"."{integer}?{exponent}?)|("."{integer}{exponent}?)|({integer}{exponent})
+identifier  [a-zA-Z_$][a-zA-Z0-9_$]*
 whitespace  [ \t]
 escape_seq  \\[fnrt\\\"]
-reserved    ("++"|"--"|"null"|"Integer"|"System")
+reserved    "++"|"--"|"null"|"Integer"|"System"|"abstract"|"assert"|"break"|"byte"|"case"|"catch"|"char"|"const"|"continue"|"default"|"do"|"enum"|"extends"|"final"|"finally"|"float"|"for"|"goto"|"implements"|"import"|"instanceof"|"interface"|"long"|"native"|"new"|"package"|"private"|"protected"|"short"|"strictfp"|"super"|"switch"|"synchronized"|"this"|"throw"|"throws"|"transient"|"try"|"volatile"
 %X COMMENT1
 %X COMMENT2
 %X STRING
@@ -48,6 +53,9 @@ reserved    ("++"|"--"|"null"|"Integer"|"System")
 ","                     { handle_token("COMMA", yyleng); }
 ";"                     { handle_token("SEMICOLON", yyleng); }
 
+"//"                    { BEGIN(COMMENT1); }
+"/*"                    { BEGIN(COMMENT2); comment_line = line_count; comment_col = col_count; col_count += 2; }
+
 "*"                     { handle_token("STAR", yyleng); }
 "/"                     { handle_token("DIV", yyleng); }
 "+"                     { handle_token("PLUS", yyleng); }
@@ -63,11 +71,10 @@ reserved    ("++"|"--"|"null"|"Integer"|"System")
 
 int                     { handle_token("INT", yyleng); }
 double                  { handle_token("DOUBLE", yyleng); }
-boolean                 { handle_token("BOOLEAN", yyleng); }
+boolean                 { handle_token("BOOL", yyleng); }
 String                  { handle_token("STRING", yyleng); }
 
 if                      { handle_token("IF", yyleng); }
-then                    { handle_token("THEN", yyleng); }
 else                    { handle_token("ELSE", yyleng); }
 
 true|false              { handle_token("BOOLLIT", yyleng); }
@@ -79,35 +86,38 @@ static                  { handle_token("STATIC", yyleng); }
 void                    { handle_token("VOID", yyleng); }
 while                   { handle_token("WHILE", yyleng); }
 
-{reserved}              { handle_token("RESERVED", yyleng); }
+{reserved}              { if (print) printf("RESERVED(%s)\n", yytext); col_count += yyleng; }
 ".length"               { handle_token("DOTLENGTH", yyleng); }
 "System.out.print"      { handle_token("PRINT", yyleng); }
 "Integer.parseInt"      { handle_token("PARSEINT", yyleng); }
 
-{digit}+                { printf("NATURAL(%s)\n", yytext); col_count += yyleng; }
-{digit}*"."{digit}+     { printf("DECIMAL(%s)\n", yytext); col_count += yyleng; }
+{natural}               { if (print) printf("NATURAL(%s)\n", yytext); col_count += yyleng; }
+{decimal}               { if (print) printf("DECIMAL(%s)\n", yytext); col_count += yyleng; }
 {identifier}            { if (print) printf("IDENTIFIER(%s)\n", yytext); col_count += yyleng; }
 "\n"                    { line_count++; col_count = 1; }
 {whitespace}            { col_count += yyleng; }
 
-\"                      { BEGIN(STRING); string_buffer[0] = '\0'; strcat(string_buffer, "STRLIT(\""); col_count += yyleng; }
-<STRING>\"              { col_count += yyleng; strcat(string_buffer,"\")"); printf("%s\n", string_buffer); BEGIN(INITIAL); }
+\"                      { BEGIN(STRING); string_buffer[0] = '\0'; strcat(string_buffer, "STRLIT(\""); string_line = line_count; string_col = col_count; col_count += yyleng; }
+<STRING>\"              { col_count += yyleng; strcat(string_buffer,"\")"); if (print) printf("%s\n", string_buffer); BEGIN(INITIAL); }
 <STRING>{escape_seq}    { strcat(string_buffer, yytext); col_count += yyleng; }
-<STRING>\\.             { printf("Line %d, column %d: invalid escape sequence (%s)\n", line_count, col_count, yytext); BEGIN(INITIAL); }
-<STRING>\n              { printf("Line %d, column %d: invalid string (newline in string)\n", line_count, col_count); }
-<STRING>\r              { printf("Line %d, column %d: invalid string (carriage return in string)\n", line_count, col_count); }
-<STRING><<EOF>>         { printf("Line %d, column %d: invalid string (EOF in string)\n", line_count, col_count); }
+<STRING>\\.             { printf("Line %d, col %d: invalid escape sequence (%s)\n", line_count, col_count, yytext); col_count += yyleng; }
+<STRING>\n              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL); }
+<STRING>\r              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); BEGIN(INITIAL); }
+<STRING><<EOF>>         { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); yyterminate(); }
 <STRING>[^\\\"\n\r]+	{ col_count += yyleng; strcat(string_buffer, yytext); }
 
-"//"                    { BEGIN(COMMENT1); }
-<COMMENT1>"\n"          { line_count++; col_count = 1; BEGIN(INITIAL); }
+<COMMENT1>\r            { line_count++; col_count = 1; BEGIN(INITIAL); }
+<COMMENT1>\n            { line_count++; col_count = 1; BEGIN(INITIAL); }
+<COMMENT1>.             { ; }
 
-"/*"                     { BEGIN(COMMENT2); }
 <COMMENT2>"*/"           { col_count += 2; BEGIN(INITIAL); }
-<COMMENT2>"\n"           { line_count++; col_count = 1; }
-<COMMENT2>.              { col_count += yyleng; }
+<COMMENT2>"\r\n"         { line_count++; col_count = 1; }
+<COMMENT2>\r             { line_count++; col_count = 1; }
+<COMMENT2>\n             { line_count++; col_count = 1; }
+<COMMENT2><<EOF>>        { printf("Line %d, col %d: unterminated comment\n", comment_line, comment_col); yyterminate(); }
+<COMMENT2>.              { col_count++; }
 
-.                       { printf("Line %d, column %d: unrecognized character (%s)\n", line_count, col_count, yytext); }
+.                       { printf("Line %d, col %d: illegal character (%s)\n", line_count, col_count, yytext); col_count++; }
 %%
 extern int yylex();
 int main(int argc, char** argv) {
