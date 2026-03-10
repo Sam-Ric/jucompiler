@@ -94,13 +94,15 @@ while                   { handle_token("WHILE", yyleng); }
 {natural}               { if (print) printf("NATURAL(%s)\n", yytext); col_count += yyleng; }
 {decimal}               { if (print) printf("DECIMAL(%s)\n", yytext); col_count += yyleng; }
 {identifier}            { if (print) printf("IDENTIFIER(%s)\n", yytext); col_count += yyleng; }
+"\r\n"                  { line_count++; col_count = 1; }
+"\r"                    { line_count++; col_count = 1; }
 "\n"                    { line_count++; col_count = 1; }
 {whitespace}            { col_count += yyleng; }
 
 \"                      { BEGIN(STRING); string_buffer[0] = '\0'; strcat(string_buffer, "STRLIT(\""); string_line = line_count; string_col = col_count; col_count += yyleng; }
 <STRING>\"              { col_count += yyleng; strcat(string_buffer,"\")"); if (print) printf("%s\n", string_buffer); BEGIN(INITIAL); }
 <STRING>{escape_seq}    { strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); col_count += yyleng; }
-<STRING>\\.             { printf("Line %d, col %d: invalid escape sequence (%s)\n", line_count, col_count, yytext); col_count += yyleng; }
+<STRING>\\.             { printf("Line %d, col %d: invalid escape sequence (%s)\n", line_count, col_count, yytext); col_count += yyleng; BEGIN(INITIAL); }
 <STRING>\n              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL); }
 <STRING>\r              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); col_count++; BEGIN(INITIAL); }
 <STRING><<EOF>>         { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); yyterminate(); }
