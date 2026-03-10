@@ -102,9 +102,9 @@ while                   { handle_token("WHILE", yyleng); }
 \"                      { BEGIN(STRING); string_buffer[0] = '\0'; strcat(string_buffer, "STRLIT(\""); string_line = line_count; string_col = col_count; col_count += yyleng; }
 <STRING>\"              { col_count += yyleng; strcat(string_buffer,"\")"); if (print) printf("%s\n", string_buffer); BEGIN(INITIAL); }
 <STRING>{escape_seq}    { strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); col_count += yyleng; }
-<STRING>\\.             { printf("Line %d, col %d: invalid escape sequence (%s)\n", line_count, col_count, yytext); col_count += yyleng; BEGIN(INITIAL); }
+<STRING>\\.             { printf("Line %d, col %d: invalid escape sequence (%s)\n", line_count, col_count, yytext); col_count += yyleng; }
 <STRING>\n              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL); }
-<STRING>\r              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); col_count++; BEGIN(INITIAL); }
+<STRING>\r              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); col_count++; BEGIN(INITIAL);}
 <STRING><<EOF>>         { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); yyterminate(); }
 <STRING>[^\\\"\n\r]+	{ col_count += yyleng; strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); }
 
