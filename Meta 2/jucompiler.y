@@ -69,6 +69,8 @@ extern char *yytext;
 // Grammar
 %%
 
+jucompiler: Program                 { printf("%d\n", )}
+
 %%
 
 void yyerror(char *error) {
