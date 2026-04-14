@@ -32,68 +32,68 @@ reserved    "++"|"--"|"null"|"Integer"|"System"|"abstract"|"assert"|"break"|"byt
 %X COMMENT2
 %X STRING
 %%
-"("                     { handle_token("LPAR", yyleng); }
-")"                     { handle_token("RPAR", yyleng); }
-"{"                     { handle_token("LBRACE", yyleng); }
-"}"                     { handle_token("RBRACE", yyleng); }
-"["                     { handle_token("LSQ", yyleng); }
-"]"                     { handle_token("RSQ", yyleng); }
+"("                     { handle_token("LPAR", yyleng); return LPAR; }
+")"                     { handle_token("RPAR", yyleng); return RPAR; }
+"{"                     { handle_token("LBRACE", yyleng); return LBRACE; }
+"}"                     { handle_token("RBRACE", yyleng); return RBRACE; }
+"["                     { handle_token("LSQ", yyleng); return LSQ; }
+"]"                     { handle_token("RSQ", yyleng); return RSQ; }
 
-"=="                    { handle_token("EQ", yyleng); }
-"="                     { handle_token("ASSIGN", yyleng); }
+"=="                    { handle_token("EQ", yyleng); return EQ; }
+"="                     { handle_token("ASSIGN", yyleng); return ASSIGN; }
 
-">="                    { handle_token("GE", yyleng); }
-">"                     { handle_token("GT", yyleng); }
-"<="                    { handle_token("LE", yyleng); }
-"<"                     { handle_token("LT", yyleng); }
+">="                    { handle_token("GE", yyleng); return GE; }
+">"                     { handle_token("GT", yyleng); return GT; }
+"<="                    { handle_token("LE", yyleng); return LE; }
+"<"                     { handle_token("LT", yyleng); return LT; }
 
-"!="                    { handle_token("NE", yyleng); }
-"!"                     { handle_token("NOT", yyleng); }
+"!="                    { handle_token("NE", yyleng); return NE; }
+"!"                     { handle_token("NOT", yyleng); return NOT; }
 
-","                     { handle_token("COMMA", yyleng); }
-";"                     { handle_token("SEMICOLON", yyleng); }
+","                     { handle_token("COMMA", yyleng); return COMMA; }
+";"                     { handle_token("SEMICOLON", yyleng); return SEMICOLON; }
 
 "//"                    { BEGIN(COMMENT1); }
 "/*"                    { BEGIN(COMMENT2); comment_line = line_count; comment_col = col_count; col_count += 2; }
 
-"*"                     { handle_token("STAR", yyleng); }
-"/"                     { handle_token("DIV", yyleng); }
-"+"                     { handle_token("PLUS", yyleng); }
-"-"                     { handle_token("MINUS", yyleng); }
-"%"                     { handle_token("MOD", yyleng); }
+"*"                     { handle_token("STAR", yyleng); return STAR; }
+"/"                     { handle_token("DIV", yyleng); return DIV; }
+"+"                     { handle_token("PLUS", yyleng); return PLUS; }
+"-"                     { handle_token("MINUS", yyleng); return MINUS; }
+"%"                     { handle_token("MOD", yyleng); return MOD; }
 
-"&&"                    { handle_token("AND", yyleng); }
-"||"                    { handle_token("OR", yyleng); }
-"->"                    { handle_token("ARROW", yyleng); }
-"<<"                    { handle_token("LSHIFT", yyleng); }
-">>"                    { handle_token("RSHIFT", yyleng); }
-"^"                     { handle_token("XOR", yyleng); }
+"&&"                    { handle_token("AND", yyleng); return AND; }
+"||"                    { handle_token("OR", yyleng); return OR; }
+"->"                    { handle_token("ARROW", yyleng); return ARROW; }
+"<<"                    { handle_token("LSHIFT", yyleng); return LSHIFT; }
+">>"                    { handle_token("RSHIFT", yyleng); return RSHIFT; }
+"^"                     { handle_token("XOR", yyleng); return XOR; }
 
-int                     { handle_token("INT", yyleng); }
-double                  { handle_token("DOUBLE", yyleng); }
-boolean                 { handle_token("BOOL", yyleng); }
-String                  { handle_token("STRING", yyleng); }
+int                     { handle_token("INT", yyleng); return INT; }
+double                  { handle_token("DOUBLE", yyleng); return DOUBLE; }
+boolean                 { handle_token("BOOL", yyleng); return BOOL; }
+String                  { handle_token("STRING", yyleng); return STRING; }
 
-if                      { handle_token("IF", yyleng); }
-else                    { handle_token("ELSE", yyleng); }
+if                      { handle_token("IF", yyleng); return IF; }
+else                    { handle_token("ELSE", yyleng); return ELSE; }
 
-true|false              { printf("BOOLLIT(%s)\n", yytext); col_count += yyleng; }
+true|false              { printf("BOOLLIT(%s)\n", yytext); col_count += yyleng; return BOOLIT; }
 
-class                   { handle_token("CLASS", yyleng); }
-public                  { handle_token("PUBLIC", yyleng); }
-return                  { handle_token("RETURN", yyleng); }
-static                  { handle_token("STATIC", yyleng); }
-void                    { handle_token("VOID", yyleng); }
-while                   { handle_token("WHILE", yyleng); }
+class                   { handle_token("CLASS", yyleng); return CLASS; }
+public                  { handle_token("PUBLIC", yyleng); return PUBLIC; }
+return                  { handle_token("RETURN", yyleng); return RETURN; }
+static                  { handle_token("STATIC", yyleng); return STATIC; }
+void                    { handle_token("VOID", yyleng); return VOID; }
+while                   { handle_token("WHILE", yyleng); return WHILE; }
 
-{reserved}              { if (print) printf("RESERVED(%s)\n", yytext); col_count += yyleng; }
-".length"               { handle_token("DOTLENGTH", yyleng); }
-"System.out.print"      { handle_token("PRINT", yyleng); }
-"Integer.parseInt"      { handle_token("PARSEINT", yyleng); }
+{reserved}              { if (print) printf("RESERVED(%s)\n", yytext); col_count += yyleng; return RESERVED;}
+".length"               { handle_token("DOTLENGTH", yyleng); return DOTLENGTH; }
+"System.out.print"      { handle_token("PRINT", yyleng); return PRINT; }
+"Integer.parseInt"      { handle_token("PARSEINT", yyleng); return PARSEINT; }
 
-{natural}               { if (print) printf("NATURAL(%s)\n", yytext); col_count += yyleng; }
-{decimal}               { if (print) printf("DECIMAL(%s)\n", yytext); col_count += yyleng; }
-{identifier}            { if (print) printf("IDENTIFIER(%s)\n", yytext); col_count += yyleng; }
+{natural}               { if (print) printf("NATURAL(%s)\n", yytext); col_count += yyleng; return NATURAL; }
+{decimal}               { if (print) printf("DECIMAL(%s)\n", yytext); col_count += yyleng; return DECIMAL; }
+{identifier}            { if (print) printf("IDENTIFIER(%s)\n", yytext); col_count += yyleng; return IDENTIFIER; }
 "\r\n"                  { line_count++; col_count = 1; }
 "\r"                    { line_count++; col_count = 1; }
 "\n"                    { line_count++; col_count = 1; }
