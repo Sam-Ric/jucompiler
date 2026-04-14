@@ -25,7 +25,7 @@ integer     [0-9]([0-9_]*[0-9])?
 exponent    [eE][+-]?{integer}
 decimal     ({integer}"."{integer}?{exponent}?)|("."{integer}{exponent}?)|({integer}{exponent})
 identifier  [a-zA-Z_$][a-zA-Z0-9_$]*
-whitespace  [ \t]
+whitespace  [ \t\f]
 escape_seq  \\[fnrt\\\"]
 reserved    "++"|"--"|"null"|"Integer"|"System"|"abstract"|"assert"|"break"|"byte"|"case"|"catch"|"char"|"const"|"continue"|"default"|"do"|"enum"|"extends"|"final"|"finally"|"float"|"for"|"goto"|"implements"|"import"|"instanceof"|"interface"|"long"|"native"|"new"|"package"|"private"|"protected"|"short"|"strictfp"|"super"|"switch"|"synchronized"|"this"|"throw"|"throws"|"transient"|"try"|"volatile"
 %X COMMENT1
@@ -102,12 +102,13 @@ while                   { handle_token("WHILE", yyleng); }
 \"                      { BEGIN(STRING); string_buffer[0] = '\0'; strcat(string_buffer, "STRLIT(\""); string_line = line_count; string_col = col_count; col_count += yyleng; string_error = 0; }
 <STRING>\"              { col_count += yyleng; if (!string_error) {strcat(string_buffer,"\")"); if (print) printf("%s\n", string_buffer);} BEGIN(INITIAL); }
 <STRING>\\\r\n          { printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
+<STRING>\\\r            { printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
 <STRING>\\\n            { printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
 <STRING>{escape_seq}    { strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); col_count += yyleng; }
 <STRING>\\.             { printf("Line %d, col %d: invalid escape sequence (%s)\n", line_count, col_count, yytext); col_count += yyleng; string_error = 1;}
 <STRING>"\r\n"          { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL); }
 <STRING>\n              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL); }
-<STRING>\r              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); col_count++; BEGIN(INITIAL);}
+<STRING>\r              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL);}
 <STRING><<EOF>>         { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); yyterminate(); }
 <STRING>[^\\"\n\r]+	{ col_count += yyleng; strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); }
 
