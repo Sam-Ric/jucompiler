@@ -42,8 +42,8 @@ extern char *yytext;
 
 %token INT
 %token DOUBLE
+%token STRLIT
 %token BOOL
-%token STRING
 
 %token IF
 %token ELSE
@@ -66,10 +66,162 @@ extern char *yytext;
 %token DECIMAL
 %token IDENTIFIER
 
+// Precedências
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+
+%left OR 
+%left XOR 
+%left AND 
+%left EQ NE 
+%left LT LE GT GE 
+%left LSHIFT RSHIFT
+%left PLUS MINUS 
+%left STAR DIV MOD 
+
+%nonassoc UNARY
+
 // Grammar
 %%
 
-jucompiler: Program                 { printf("%d\n", )}
+Program
+  : CLASS IDENTIFIER LBRACE MemberList RBRACE
+  ;
+
+MemberList
+  : 
+  | MemberList MethodDecl
+  | MemberList FieldDecl
+  | MemberList SEMICOLON
+  ;
+
+MethodDecl
+  : PUBLIC STATIC MethodHeader MethodBody
+  ;
+
+FieldDecl
+  : PUBLIC STATIC Type IDENTIFIER IdentifierList SEMICOLON
+  | error SEMICOLON
+  ;
+
+IdentifierList
+  :
+  | IdentifierList COMMA IDENTIFIER
+  ;
+
+Type
+  : BOOL
+  | INT
+  | DOUBLE
+  ;
+
+MethodHeader
+  : ReturnType IDENTIFIER LPAR RPAR 
+  | ReturnType IDENTIFIER LPAR FormalParams RPAR
+  ;
+
+ReturnType
+  : Type 
+  | VOID 
+  ;
+
+FormalParams
+  : ParamList 
+  | STRLIT LSQ RSQ IDENTIFIER
+  ;
+
+ParamList
+  : Type IDENTIFIER
+  | ParamList COMMA Type IDENTIFIER
+  ;
+
+MethodBody
+  : LBRACE StatementOrVarDecl RBRACE 
+  ;
+
+StatementOrVarDecl
+  :
+  | StatementOrVarDecl Statement 
+  | StatementOrVarDecl VarDecl 
+  ;
+
+VarDecl
+  : Type IDENTIFIER IdentifierList SEMICOLON
+  ;
+
+Statement
+  : LBRACE StatementList RBRACE
+  | IF LPAR Expr RPAR Statement                   %prec LOWER_THAN_ELSE
+  | IF LPAR Expr RPAR Statement ELSE Statement
+  | WHILE LPAR Expr RPAR Statement
+  | RETURN SEMICOLON
+  | RETURN Expr SEMICOLON
+  | SEMICOLON
+  | MethodInvocation SEMICOLON
+  | Assignment SEMICOLON
+  | ParseArgs SEMICOLON
+  | PRINT LPAR Expr RPAR SEMICOLON
+  | PRINT LPAR STRLIT RPAR SEMICOLON
+  | error SEMICOLON
+  ;
+
+StatementList
+  : 
+  | StatementList Statement
+  ;
+
+MethodInvocation
+  : IDENTIFIER LPAR RPAR
+  | IDENTIFIER LPAR ArgList RPAR
+  | IDENTIFIER LPAR error RPAR
+  ;
+
+ArgList
+  : Expr
+  | ArgList COMMA Expr
+  ;
+
+Assignment
+  : IDENTIFIER ASSIGN Expr
+  ;
+
+ParseArgs
+  : PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+  | PARSEINT LPAR error RPAR
+  ;
+
+Expr
+  : Expr PLUS   Expr
+  | Expr MINUS  Expr
+  | Expr STAR   Expr
+  | Expr DIV    Expr
+  | Expr MOD    Expr
+  | Expr AND    Expr
+  | Expr OR     Expr
+  | Expr XOR    Expr
+  | Expr LSHIFT Expr
+  | Expr RSHIFT Expr
+  | Expr EQ     Expr
+  | Expr GE     Expr
+  | Expr GT     Expr
+  | Expr LE     Expr
+  | Expr LT     Expr
+  | Expr NE     Expr
+  | MINUS Expr            %prec UNARY
+  | PLUS  Expr            %prec UNARY
+  | NOT   Expr            %prec UNARY
+  | LPAR Expr RPAR
+  | LPAR error RPAR
+  | MethodInvocation
+  | Assignment
+  | ParseArgs
+  | IDENTIFIER
+  | IDENTIFIER DOTLENGTH
+  | NATURAL
+  | DECIMAL
+  | BOOLIT
+  ;
 
 %%
 
