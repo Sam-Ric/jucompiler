@@ -4,10 +4,11 @@
 */
 %{
 #include <stdio.h>
+#include "ast.h"
 extern int yylex(void);;
 void yyerror(char *);
 extern char *yytext;
-extern int line_count, col_count;
+extern int line_count, prev_col;
 %}
 
 // Tokens

@@ -5,15 +5,25 @@
 
 %{
     /* place here any C variables and definitions */
+    #include "y.tab.h"
+    #include "ast.h"
     #include <string.h>
+
+    extern int yyparse();
+    extern int syntax_errors;
+    extern struct node *root;
+    
     int line_count = 1;
     int col_count = 1;
     int comment_line, comment_col;
     char string_buffer[1024];
+    char string_content[1024]; // Second buffer to store only the string content without the STRLIT.
     int string_line, string_col, string_error;
+    int prev_col = 1;
 
     int print = 0;
     void handle_token(char* token, int yyleng) {
+        prev_col = col_count;
         col_count += yyleng;
         if (print)
             printf("%s\n", token);
@@ -77,7 +87,7 @@ String                  { handle_token("STRING", yyleng); return STRING; }
 if                      { handle_token("IF", yyleng); return IF; }
 else                    { handle_token("ELSE", yyleng); return ELSE; }
 
-true|false              { printf("BOOLLIT(%s)\n", yytext); col_count += yyleng; return BOOLIT; }
+true|false              { if (print) printf("BOOLLIT(%s)\n", yytext);  prev_col = col_count; yylval.val = strdup(yytext); col_count += yyleng; return BOOLIT; }
 
 class                   { handle_token("CLASS", yyleng); return CLASS; }
 public                  { handle_token("PUBLIC", yyleng); return PUBLIC; }
@@ -86,31 +96,31 @@ static                  { handle_token("STATIC", yyleng); return STATIC; }
 void                    { handle_token("VOID", yyleng); return VOID; }
 while                   { handle_token("WHILE", yyleng); return WHILE; }
 
-{reserved}              { if (print) printf("RESERVED(%s)\n", yytext); col_count += yyleng; return RESERVED;}
+{reserved}              { if (print) printf("RESERVED(%s)\n", yytext); prev_col = col_count; col_count += yyleng; return RESERVED;}
 ".length"               { handle_token("DOTLENGTH", yyleng); return DOTLENGTH; }
 "System.out.print"      { handle_token("PRINT", yyleng); return PRINT; }
 "Integer.parseInt"      { handle_token("PARSEINT", yyleng); return PARSEINT; }
 
-{natural}               { if (print) printf("NATURAL(%s)\n", yytext); col_count += yyleng; return NATURAL; }
-{decimal}               { if (print) printf("DECIMAL(%s)\n", yytext); col_count += yyleng; return DECIMAL; }
-{identifier}            { if (print) printf("IDENTIFIER(%s)\n", yytext); col_count += yyleng; return IDENTIFIER; }
+{natural}               { if (print) printf("NATURAL(%s)\n", yytext); prev_col = col_count; yylval.val = strdup(yytext); col_count += yyleng; return NATURAL; }
+{decimal}               { if (print) printf("DECIMAL(%s)\n", yytext); prev_col = col_count; yylval.val = strdup(yytext); col_count += yyleng; return DECIMAL; }
+{identifier}            { if (print) printf("IDENTIFIER(%s)\n", yytext); prev_col = col_count; yylval.val = strdup(yytext); col_count += yyleng; return IDENTIFIER; }
 "\r\n"                  { line_count++; col_count = 1; }
 "\r"                    { line_count++; col_count = 1; }
 "\n"                    { line_count++; col_count = 1; }
 {whitespace}            { col_count += yyleng; }
 
-\"                      { BEGIN(STRING); string_buffer[0] = '\0'; strcat(string_buffer, "STRLIT(\""); string_line = line_count; string_col = col_count; col_count += yyleng; string_error = 0; }
-<STRING>\"              { col_count += yyleng; if (!string_error) {strcat(string_buffer,"\")"); if (print) printf("%s\n", string_buffer);} BEGIN(INITIAL); }
+\"                      { BEGIN(STRING); string_buffer[0] = '\0'; strcat(string_buffer, "STRLIT(\""); string_content[0] = '\0'; strcat(string_content, "\""); string_line = line_count; string_col = col_count; col_count += yyleng; string_error = 0; }
+<STRING>\"              { col_count += yyleng; if (!string_error) {strcat(string_buffer,"\")"); strcat(string_content,"\""); if (print) printf("%s\n", string_buffer); yylval.val = strdup(string_content);} BEGIN(INITIAL); if (!string_error) return STRLIT; }
 <STRING>\\\r\n          { printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
 <STRING>\\\r            { printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
 <STRING>\\\n            { printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
-<STRING>{escape_seq}    { strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); col_count += yyleng; }
+<STRING>{escape_seq}    { strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); strncat(string_content, yytext, sizeof(string_content)-strlen(string_content)-1); col_count += yyleng; }
 <STRING>\\.             { printf("Line %d, col %d: invalid escape sequence (%s)\n", line_count, col_count, yytext); col_count += yyleng; string_error = 1;}
 <STRING>"\r\n"          { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL); }
 <STRING>\n              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL); }
 <STRING>\r              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL);}
 <STRING><<EOF>>         { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); yyterminate(); }
-<STRING>[^\\"\n\r]+	{ col_count += yyleng; strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); }
+<STRING>[^\\"\n\r]+	    { col_count += yyleng; strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); strncat(string_content, yytext, sizeof(string_content)-strlen(string_content)-1); }
 
 <COMMENT1>"\r\n"        { line_count++; col_count = 1; BEGIN(INITIAL); }
 <COMMENT1>\r            { line_count++; col_count = 1; BEGIN(INITIAL); }
@@ -128,30 +138,39 @@ while                   { handle_token("WHILE", yyleng); return WHILE; }
 .                       { printf("Line %d, col %d: illegal character (%s)\n", line_count, col_count, yytext); col_count++; }
 %%
 extern int yylex();
+
 int main(int argc, char** argv) {
-    if (argc > 2) {
-        printf("Invalid option\n");
-        return 1;
+    int mode = 0; // 0: Default, 1: -l, 2: -e1, 3: -t, 4: -e2
+
+    if (argc > 1) {
+        if (strcmp(argv[1], "-l") == 0) mode = 1;
+        else if (strcmp(argv[1], "-e1") == 0) mode = 2;
+        else if (strcmp(argv[1], "-t") == 0) mode = 3;
+        else if (strcmp(argv[1], "-e2") == 0) mode = 4;
     }
 
-    // Execution options
-    if (argc == 2) {
-        // -- Print errors and tokens
-        if (strcmp(argv[1], "-l") == 0)
-            print = 1;
-        // -- Print errors only
-        else if (strcmp(argv[1], "-e1") == 0) {
-            // ...
-        }
-        else {
-            printf("Invalid option\n");
-            return 1;
-        }
+    if (mode == 1 || mode == 2) {
+        // Only lexical analysis
+        if (mode == 1) 
+            print = 1; // Activates tokens printing
+        while (yylex()); 
+        return 0; // Ends without calling the parser
     }
 
-    yylex();    /* run the lexical analysis automaton */
+    // Invocation of the parser
+    yyparse(); 
+
+    if (mode == 3 && !syntax_errors) {
+        // AST is printed if -t flag is used and theres no syntatical error
+        show(root, 0);
+    }
+    
+    // Memory free.
+    if (root) freenode(root);
+
     return 0;
 }
+
 int yywrap() {  /* called on EOF, return 1 to terminate */
     return 1;
 }
