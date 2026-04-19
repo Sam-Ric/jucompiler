@@ -6,7 +6,8 @@
 #include <stdio.h>
 extern int yylex(void);;
 void yyerror(char *);
-extern char *yytext;  
+extern char *yytext;
+extern int line_count, col_count;
 %}
 
 // Tokens
@@ -42,7 +43,7 @@ extern char *yytext;
 
 %token INT
 %token DOUBLE
-%token STRLIT
+%token STRING
 %token BOOL
 
 %token IF
@@ -128,7 +129,7 @@ ReturnType
 
 FormalParams
   : ParamList 
-  | STRLIT LSQ RSQ IDENTIFIER
+  | STRING LSQ RSQ IDENTIFIER
   ;
 
 ParamList
@@ -162,7 +163,7 @@ Statement
   | Assignment SEMICOLON
   | ParseArgs SEMICOLON
   | PRINT LPAR Expr RPAR SEMICOLON
-  | PRINT LPAR STRLIT RPAR SEMICOLON
+  | PRINT LPAR STRING RPAR SEMICOLON
   | error SEMICOLON
   ;
 
@@ -225,6 +226,6 @@ Expr
 
 %%
 
-void yyerror(char *error) {
-    printf("%s '%s'\n", error, yytext);
+void yyerror(char *s) {
+    printf("Line %d, col %d: %s: %s\n", line_count, col_count, s, yytext);
 }
