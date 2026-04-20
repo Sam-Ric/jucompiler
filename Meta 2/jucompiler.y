@@ -3,13 +3,23 @@
   Samuel Marques Riça (2023206471)
 */
 %{
-#include <stdio.h>
-#include "ast.h"
-extern int yylex(void);;
-void yyerror(char *);
-extern char *yytext;
-extern int line_count, prev_col;
+  #include <stdio.h>
+  #include "ast.h"
+
+  extern int yylex(void);;
+  void yyerror(char *);
+  extern char *yytext;
+  extern int line_count, prev_col;
+
+  struct node *root = NULL; // AST root
+  int syntax_errors = 0;    // error counter
 %}
+
+%union {
+  char *val;              // tokens with string values
+  struct node *node;      // AST nodes
+  struct node_list *list; // list of nodes
+}
 
 // Tokens
 %token LPAR
@@ -50,8 +60,6 @@ extern int line_count, prev_col;
 %token IF
 %token ELSE
 
-%token BOOLIT
-
 %token CLASS
 %token PUBLIC
 %token RETURN
@@ -64,9 +72,11 @@ extern int line_count, prev_col;
 %token PRINT
 %token PARSEINT
 
-%token NATURAL
-%token DECIMAL
-%token IDENTIFIER
+%token<val> NATURAL
+%token<val> DECIMAL
+%token<val> IDENTIFIER
+%token<val> STRLIT
+%token<val> BOOLIT
 
 // Precedências
 
@@ -84,11 +94,24 @@ extern int line_count, prev_col;
 
 %nonassoc UNARY
 
+// Non-terminal symbols
+%type<node> Program MethodDecl FieldDecl MethodHeader MethodBody
+%type<node> Type ReturnType VarDecl Statement MethodInvocation
+%type<node> Assignment ParseArgs Expr
+%type<node> MemberList StatementOrVarDecl StatementList IdentifierList
+%type<node> FormalParams ParamList ArgList
+
+
 // Grammar
 %%
 
 Program
-  : CLASS IDENTIFIER LBRACE MemberList RBRACE
+  : CLASS IDENTIFIER LBRACE MemberList RBRACE {
+      $$ = newnode(Program, NULL, line_count, prev_count);
+      addchild($$, newnode(Identifier, $2, line_count, prev_col)); // IDENTIFIER
+      addchild($$, $4); // MemberList
+      root = $$;
+    }
   ;
 
 MemberList
@@ -99,23 +122,44 @@ MemberList
   ;
 
 MethodDecl
-  : PUBLIC STATIC MethodHeader MethodBody
+  : PUBLIC STATIC MethodHeader MethodBody {
+      $$ = newnode(MethodDecl, NULL, line_count, prev_col);
+      addchild($$, $3); // MethodHeader
+      addchild($$, $4); // MethodBody
+    }
   ;
 
 FieldDecl
-  : PUBLIC STATIC Type IDENTIFIER IdentifierList SEMICOLON
-  | error SEMICOLON
+  : PUBLIC STATIC Type IDENTIFIER IdentifierList SEMICOLON {
+      // first IDENTIFIER
+      struct node *field = newnode(FieldDecl, NULL, line_count, prev_col);
+      addchild(field, $3);  // Type
+      addchild(field, newnode(Identifier, $4, line_count, prev_col));  // IDENTIFIER
+
+      // create a list for additional IDENTIFIERs
+      struct node_list *identifiers = $5;
+      while ((identifiers = identifiers->next) != NULL) {
+        struct node *extra_field = newnode(FieldDecl, NULL, line_count, prev_col);
+        addchild(extra_field, $3); // same Type
+        addchild(extra_field, identifiers->node); // IDENTIFIER
+        addchildren($$, extra_field);
+      }
+    }
+  | error SEMICOLON { $$ = newlist(); }
   ;
 
 IdentifierList
-  :
-  | IdentifierList COMMA IDENTIFIER
+  : /* empty */ { $$ = newlist(); }
+  | IdentifierList COMMA IDENTIFIER {
+      $$ = $1;
+      addchildren($$, newnode(Identifier, $3, line_count, prev_col));
+    }
   ;
 
 Type
-  : BOOL
-  | INT
-  | DOUBLE
+  : BOOL    { $$ = newnode(Bool, NULL, line_count, prev_col); }
+  | INT     { $$ = newnode(Int, NULL, line_count, prev_col); }
+  | DOUBLE  { $$ = newnode(Double, NULL, line_count, prev_col); }
   ;
 
 MethodHeader
@@ -194,22 +238,86 @@ ParseArgs
   ;
 
 Expr
-  : Expr PLUS   Expr
-  | Expr MINUS  Expr
-  | Expr STAR   Expr
-  | Expr DIV    Expr
-  | Expr MOD    Expr
-  | Expr AND    Expr
-  | Expr OR     Expr
-  | Expr XOR    Expr
-  | Expr LSHIFT Expr
-  | Expr RSHIFT Expr
-  | Expr EQ     Expr
-  | Expr GE     Expr
-  | Expr GT     Expr
-  | Expr LE     Expr
-  | Expr LT     Expr
-  | Expr NE     Expr
+  : Expr PLUS   Expr {
+      $$ = newnode(Add, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr MINUS  Expr {
+      $$ = newnode(Sub, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr STAR   Expr {
+      $$ = newnode(Mul, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr DIV    Expr {
+      $$ = newnode(Div, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr MOD    Expr {
+      $$ = newnode(Mod, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr AND    Expr {
+      $$ = newnode(And, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr OR     Expr {
+      $$ = newnode(Or, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr XOR    Expr {
+      $$ = newnode(Xor, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr LSHIFT Expr {
+      $$ = newnode(Lshift, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr RSHIFT Expr {
+      $$ = newnode(Rshift, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr EQ     Expr {
+      $$ = newnode(Eq, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr GE     Expr {
+      $$ = newnode(Ge, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr GT     Expr {
+      $$ = newnode(Gt, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr LE     Expr {
+      $$ = newnode(Le, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr LT     Expr {
+      $$ = newnode(Lt, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
+  | Expr NE     Expr {
+      $$ = newnode(Ne, NULL, line_count, prev_col);
+      addchild($$, $1); // Expr1
+      addchild($$, $3); // Expr2
+    }
   | MINUS Expr            %prec UNARY
   | PLUS  Expr            %prec UNARY
   | NOT   Expr            %prec UNARY
@@ -228,5 +336,5 @@ Expr
 %%
 
 void yyerror(char *s) {
-    printf("Line %d, col %d: %s: %s\n", line_count, col_count, s, yytext);
+    printf("Line %d, col %d: %s: %s\n", line_count, prev_col, s, yytext);
 }
