@@ -19,11 +19,9 @@
     char string_buffer[1024];
     char string_content[1024]; // Second buffer to store only the string content without the STRLIT.
     int string_line, string_col, string_error;
-    int prev_col = 1;
 
     int print = 0;
     void handle_token(char* token, int yyleng) {
-        prev_col = col_count;
         col_count += yyleng;
         if (print)
             printf("%s\n", token);
@@ -89,7 +87,7 @@ String                  { handle_token("STRING", yyleng); return STRING; }
 if                      { handle_token("IF", yyleng); return IF; }
 else                    { handle_token("ELSE", yyleng); return ELSE; }
 
-true|false              { if (print) printf("BOOLLIT(%s)\n", yytext);  prev_col = col_count; yylval.val = strdup(yytext); col_count += yyleng; return BOOLLIT; }
+true|false              { if (print) printf("BOOLLIT(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return BOOLLIT; }
 
 class                   { handle_token("CLASS", yyleng); return CLASS; }
 public                  { handle_token("PUBLIC", yyleng); return PUBLIC; }
@@ -98,14 +96,14 @@ static                  { handle_token("STATIC", yyleng); return STATIC; }
 void                    { handle_token("VOID", yyleng); return VOID; }
 while                   { handle_token("WHILE", yyleng); return WHILE; }
 
-{reserved}              { if (print) printf("RESERVED(%s)\n", yytext); prev_col = col_count; col_count += yyleng; return RESERVED;}
+{reserved}              { if (print) printf("RESERVED(%s)\n", yytext); col_count += yyleng; return RESERVED;}
 ".length"               { handle_token("DOTLENGTH", yyleng); return DOTLENGTH; }
 "System.out.print"      { handle_token("PRINT", yyleng); return PRINT; }
 "Integer.parseInt"      { handle_token("PARSEINT", yyleng); return PARSEINT; }
 
-{natural}               { if (print) printf("NATURAL(%s)\n", yytext); prev_col = col_count; yylval.val = strdup(yytext); col_count += yyleng; return NATURAL; }
-{decimal}               { if (print) printf("DECIMAL(%s)\n", yytext); prev_col = col_count; yylval.val = strdup(yytext); col_count += yyleng; return DECIMAL; }
-{identifier}            { if (print) printf("IDENTIFIER(%s)\n", yytext); prev_col = col_count; yylval.val = strdup(yytext); col_count += yyleng; return IDENTIFIER; }
+{natural}               { if (print) printf("NATURAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return NATURAL; }
+{decimal}               { if (print) printf("DECIMAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return DECIMAL; }
+{identifier}            { if (print) printf("IDENTIFIER(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return IDENTIFIER; }
 "\r\n"                  { line_count++; col_count = 1; }
 "\r"                    { line_count++; col_count = 1; }
 "\n"                    { line_count++; col_count = 1; }
