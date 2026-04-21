@@ -19,7 +19,7 @@ struct node *newnode(enum category category, char *token, int line, int col) {
 
 // append a node to the list of children of the parent node
 void addchild(struct node *parent, struct node *child) {
-    if (child == NULL) return;
+    if (parent == NULL || child == NULL) return;
     struct node_list *new = malloc(sizeof(struct node_list));
     new->node = child;
     new->next = NULL;

@@ -1,0 +1,9 @@
+Line 2, col 17: syntax error: String
+Line 3, col 24: syntax error: ,
+Line 6, col 5: syntax error: public
+Line 9, col 21: syntax error: int
+Line 10, col 21: syntax error: continue
+Line 11, col 9: syntax error: System.out.print
+Line 13, col 24: syntax error: int
+Line 14, col 24: syntax error: continue
+Line 15, col 12: syntax error: System.out.print

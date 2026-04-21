@@ -83,23 +83,25 @@
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
-%left OR 
-%left XOR 
-%left AND 
-%left EQ NE 
-%left LT LE GT GE 
+%right ASSIGN
+
+%left OR
+%left XOR
+%left AND
+%left EQ NE
+%left LT LE GT GE
 %left LSHIFT RSHIFT
-%left PLUS MINUS 
-%left STAR DIV MOD 
+%left PLUS MINUS
+%left STAR DIV MOD
 
 %nonassoc UNARY
 
 // Non-terminal symbols
-%type<node> Program MethodDecl FieldDecl MethodHeader MethodBody
-%type<node> Type ReturnType VarDecl Statement MethodInvocation
+%type<node> Program MethodDecl MethodHeader MethodBody
+%type<node> Type Statement MethodInvocation
 %type<node> Assignment ParseArgs Expr
 %type<list> MemberList StatementOrVarDecl StatementList IdentifierList
-%type<list> FormalParams ParamList ArgList
+%type<list> FormalParams ParamList ArgList FieldDecl VarDecl
 
 
 // Grammar
@@ -107,7 +109,7 @@
 
 Program
   : CLASS IDENTIFIER LBRACE MemberList RBRACE {
-      $$ = newnode(Program, NULL, line_count, prev_count);
+      $$ = newnode(Program, NULL, line_count, prev_col);
       addchild($$, newnode(Identifier, $2, line_count, prev_col)); // IDENTIFIER
       addchildren($$, $4); // all members from the list MemberList
       root = $$;
@@ -144,6 +146,7 @@ MethodDecl
 FieldDecl
   : PUBLIC STATIC Type IDENTIFIER IdentifierList SEMICOLON {
       // first IDENTIFIER
+      $$ = newlist();
       struct node *field = newnode(FieldDecl, NULL, line_count, prev_col);
       addchild(field, $3);  // Type
       addchild(field, newnode(Identifier, $4, line_count, prev_col));  // IDENTIFIER
@@ -179,34 +182,41 @@ Type
   ;
 
 MethodHeader
-  : ReturnType IDENTIFIER LPAR RPAR {
+  : Type IDENTIFIER LPAR RPAR {
       $$ = newnode(MethodHeader, NULL, line_count, prev_col);
       addchild($$, $1);
       addchild($$, newnode(Identifier, $2, line_count, prev_col));
-      addchild($$, newnode(MethodParams, NULL, line_count, prev_col)); // empty params
+      addchild($$, newnode(MethodParams, NULL, line_count, prev_col));
     }
-  | ReturnType IDENTIFIER LPAR FormalParams RPAR {
+  | Type IDENTIFIER LPAR FormalParams RPAR {
       $$ = newnode(MethodHeader, NULL, line_count, prev_col);
       addchild($$, $1);
       addchild($$, newnode(Identifier, $2, line_count, prev_col));
-
-      // MethodParams node and its params
+      struct node *params = newnode(MethodParams, NULL, line_count, prev_col);
+      addchildren(params, $4);
+      addchild($$, params);
+    }
+  | VOID IDENTIFIER LPAR RPAR {
+      $$ = newnode(MethodHeader, NULL, line_count, prev_col);
+      addchild($$, newnode(Void, NULL, line_count, prev_col));
+      addchild($$, newnode(Identifier, $2, line_count, prev_col));
+      addchild($$, newnode(MethodParams, NULL, line_count, prev_col));
+    }
+  | VOID IDENTIFIER LPAR FormalParams RPAR {
+      $$ = newnode(MethodHeader, NULL, line_count, prev_col);
+      addchild($$, newnode(Void, NULL, line_count, prev_col));
+      addchild($$, newnode(Identifier, $2, line_count, prev_col));
       struct node *params = newnode(MethodParams, NULL, line_count, prev_col);
       addchildren(params, $4);
       addchild($$, params);
     }
   ;
 
-ReturnType
-  : Type { $$ = $1; }
-  | VOID { $$ = newnode(Void, NULL, line_count, prev_col); }
-  ;
-
 FormalParams
   : ParamList { $$ = $1; }
   | STRING LSQ RSQ IDENTIFIER {
       $$ = newlist();
-      struct node *params = newnode(ParamDecl, NULL, line_count, prev_col);
+      struct node *param = newnode(ParamDecl, NULL, line_count, prev_col);
       addchild(param, newnode(StringArray, NULL, line_count, prev_col));
       addchild(param, newnode(Identifier, $4, line_count, prev_col));
       append($$, param);
@@ -267,11 +277,12 @@ VarDecl
 
       // additional Vars
       struct node_list *identifiers = $3;
-      while ((identifier = identifier->next) != NULL) {
-        struct nde *extra_var = newnode(VarDecl, NULL, line_count, prev_col);
+      while ((identifiers = identifiers->next) != NULL) {
+        struct node *extra_var = newnode(VarDecl, NULL, line_count, prev_col);
         enum category type_category = $1->category;
         addchild(extra_var, newnode(type_category, NULL, line_count, prev_col));
-        addchild(extravar, identifier->node);
+        addchild(extra_var, identifiers->node);
+        append($$, extra_var);
       }
       free($3);
     }
@@ -285,7 +296,7 @@ Statement
       while ((temp = temp->next) != NULL) count++;
 
       if (count == 1) {
-        $$ = getchild($2, 0);
+        $$ = $2->next->node;
         free($2);
       } else {
         $$ = newnode(Block, NULL, line_count, prev_col);
@@ -481,7 +492,7 @@ Expr
     }
   | LPAR Expr RPAR { $$ = $2; }
   | LPAR error RPAR {
-      // TODO
+      $$ = NULL;
     }
   | MethodInvocation { $$ = $1; }
   | Assignment { $$ = $1; }
@@ -507,5 +518,6 @@ Expr
 %%
 
 void yyerror(char *s) {
+    syntax_errors++;
     printf("Line %d, col %d: %s: %s\n", line_count, prev_col, s, yytext);
 }
