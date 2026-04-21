@@ -30,6 +30,7 @@
     }
 
 %}
+
 natural     0|[1-9]([0-9_]*[0-9])?
 integer     [0-9]([0-9_]*[0-9])?
 exponent    [eE][+-]?{integer}
@@ -41,6 +42,7 @@ reserved    "++"|"--"|"null"|"Integer"|"System"|"abstract"|"assert"|"break"|"byt
 %X COMMENT1
 %X COMMENT2
 %X STRING
+
 %%
 "("                     { handle_token("LPAR", yyleng); return LPAR; }
 ")"                     { handle_token("RPAR", yyleng); return RPAR; }
@@ -87,7 +89,7 @@ String                  { handle_token("STRING", yyleng); return STRING; }
 if                      { handle_token("IF", yyleng); return IF; }
 else                    { handle_token("ELSE", yyleng); return ELSE; }
 
-true|false              { if (print) printf("BOOLLIT(%s)\n", yytext);  prev_col = col_count; yylval.val = strdup(yytext); col_count += yyleng; return BOOLIT; }
+true|false              { if (print) printf("BOOLLIT(%s)\n", yytext);  prev_col = col_count; yylval.val = strdup(yytext); col_count += yyleng; return BOOLLIT; }
 
 class                   { handle_token("CLASS", yyleng); return CLASS; }
 public                  { handle_token("PUBLIC", yyleng); return PUBLIC; }
