@@ -148,7 +148,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 18 "jucompiler.y"
+#line 19 "jucompiler.y"
 {
   char *val;              // tokens with string values
   struct node *node;      // AST nodes

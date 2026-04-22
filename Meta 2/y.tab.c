@@ -182,7 +182,8 @@
   extern int yylex(void);;
   void yyerror(char *);
   extern char *yytext;
-  extern int line_count, col_count;
+  extern char last_token_text[];
+  extern int line_count, col_count, string_col;
 
   struct node *root = NULL; // AST root
   int syntax_errors = 0;    // error counter
@@ -208,14 +209,14 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 18 "jucompiler.y"
+#line 19 "jucompiler.y"
 {
   char *val;              // tokens with string values
   struct node *node;      // AST nodes
   struct node_list *list; // list of nodes
 }
 /* Line 193 of yacc.c.  */
-#line 219 "y.tab.c"
+#line 220 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -228,7 +229,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 232 "y.tab.c"
+#line 233 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -550,14 +551,14 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   111,   111,   120,   121,   125,   133,   139,   147,   167,
-     171,   172,   179,   180,   181,   185,   191,   199,   205,   216,
-     217,   227,   234,   244,   251,   252,   258,   269,   292,   308,
-     317,   329,   334,   337,   341,   342,   343,   344,   345,   349,
-     353,   357,   358,   366,   370,   375,   382,   386,   393,   401,
-     406,   412,   417,   422,   427,   432,   437,   442,   447,   452,
-     457,   462,   467,   472,   477,   482,   487,   492,   496,   500,
-     504,   505,   508,   509,   510,   511,   514,   518,   521,   524
+       0,   112,   112,   121,   122,   126,   134,   140,   148,   168,
+     172,   173,   180,   181,   182,   186,   192,   200,   206,   217,
+     218,   228,   235,   245,   252,   253,   259,   270,   293,   309,
+     318,   330,   335,   338,   342,   343,   344,   345,   346,   350,
+     354,   358,   359,   367,   371,   376,   383,   387,   394,   402,
+     407,   413,   418,   423,   428,   433,   438,   443,   448,   453,
+     458,   463,   468,   473,   478,   483,   488,   493,   497,   501,
+     505,   506,   509,   510,   511,   512,   515,   519,   522,   525
 };
 #endif
 
@@ -1626,7 +1627,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 111 "jucompiler.y"
+#line 112 "jucompiler.y"
     {
       (yyval.node) = newnode(Program, NULL, line_count, col_count);
       addchild((yyval.node), newnode(Identifier, (yyvsp[(2) - (5)].val), line_count, col_count)); // IDENTIFIER
@@ -1636,12 +1637,12 @@ yyreduce:
     break;
 
   case 3:
-#line 120 "jucompiler.y"
+#line 121 "jucompiler.y"
     { (yyval.list) = newlist(); }
     break;
 
   case 4:
-#line 121 "jucompiler.y"
+#line 122 "jucompiler.y"
     {
       (yyval.list) = (yyvsp[(1) - (2)].list);
       append((yyval.list), (yyvsp[(2) - (2)].node));
@@ -1649,7 +1650,7 @@ yyreduce:
     break;
 
   case 5:
-#line 125 "jucompiler.y"
+#line 126 "jucompiler.y"
     {
       (yyval.list) = (yyvsp[(1) - (2)].list);
       struct node_list *field_list = (yyvsp[(2) - (2)].list);
@@ -1661,14 +1662,14 @@ yyreduce:
     break;
 
   case 6:
-#line 133 "jucompiler.y"
+#line 134 "jucompiler.y"
     {
       (yyval.list) = (yyvsp[(1) - (2)].list);  // ignore empty statement
     }
     break;
 
   case 7:
-#line 139 "jucompiler.y"
+#line 140 "jucompiler.y"
     {
       (yyval.node) = newnode(MethodDecl, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(3) - (4)].node)); // MethodHeader
@@ -1677,7 +1678,7 @@ yyreduce:
     break;
 
   case 8:
-#line 147 "jucompiler.y"
+#line 148 "jucompiler.y"
     {
       // first IDENTIFIER
       (yyval.list) = newlist();
@@ -1701,17 +1702,17 @@ yyreduce:
     break;
 
   case 9:
-#line 167 "jucompiler.y"
+#line 168 "jucompiler.y"
     { (yyval.list) = newlist(); }
     break;
 
   case 10:
-#line 171 "jucompiler.y"
+#line 172 "jucompiler.y"
     { (yyval.list) = newlist(); }
     break;
 
   case 11:
-#line 172 "jucompiler.y"
+#line 173 "jucompiler.y"
     {
       (yyval.list) = (yyvsp[(1) - (3)].list);
       append((yyval.list), newnode(Identifier, (yyvsp[(3) - (3)].val), line_count, col_count));
@@ -1719,22 +1720,22 @@ yyreduce:
     break;
 
   case 12:
-#line 179 "jucompiler.y"
+#line 180 "jucompiler.y"
     { (yyval.node) = newnode(Bool, NULL, line_count, col_count); }
     break;
 
   case 13:
-#line 180 "jucompiler.y"
+#line 181 "jucompiler.y"
     { (yyval.node) = newnode(Int, NULL, line_count, col_count); }
     break;
 
   case 14:
-#line 181 "jucompiler.y"
+#line 182 "jucompiler.y"
     { (yyval.node) = newnode(Double, NULL, line_count, col_count); }
     break;
 
   case 15:
-#line 185 "jucompiler.y"
+#line 186 "jucompiler.y"
     {
       (yyval.node) = newnode(MethodHeader, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (4)].node));
@@ -1744,7 +1745,7 @@ yyreduce:
     break;
 
   case 16:
-#line 191 "jucompiler.y"
+#line 192 "jucompiler.y"
     {
       (yyval.node) = newnode(MethodHeader, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (5)].node));
@@ -1756,7 +1757,7 @@ yyreduce:
     break;
 
   case 17:
-#line 199 "jucompiler.y"
+#line 200 "jucompiler.y"
     {
       (yyval.node) = newnode(MethodHeader, NULL, line_count, col_count);
       addchild((yyval.node), newnode(Void, NULL, line_count, col_count));
@@ -1766,7 +1767,7 @@ yyreduce:
     break;
 
   case 18:
-#line 205 "jucompiler.y"
+#line 206 "jucompiler.y"
     {
       (yyval.node) = newnode(MethodHeader, NULL, line_count, col_count);
       addchild((yyval.node), newnode(Void, NULL, line_count, col_count));
@@ -1778,12 +1779,12 @@ yyreduce:
     break;
 
   case 19:
-#line 216 "jucompiler.y"
+#line 217 "jucompiler.y"
     { (yyval.list) = (yyvsp[(1) - (1)].list); }
     break;
 
   case 20:
-#line 217 "jucompiler.y"
+#line 218 "jucompiler.y"
     {
       (yyval.list) = newlist();
       struct node *param = newnode(ParamDecl, NULL, line_count, col_count);
@@ -1794,7 +1795,7 @@ yyreduce:
     break;
 
   case 21:
-#line 227 "jucompiler.y"
+#line 228 "jucompiler.y"
     {
       (yyval.list) = newlist();
       struct node *param = newnode(ParamDecl, NULL, line_count, col_count);
@@ -1805,7 +1806,7 @@ yyreduce:
     break;
 
   case 22:
-#line 234 "jucompiler.y"
+#line 235 "jucompiler.y"
     {
       (yyval.list) = (yyvsp[(1) - (4)].list);
       struct node *param = newnode(ParamDecl, NULL, line_count, col_count);
@@ -1816,7 +1817,7 @@ yyreduce:
     break;
 
   case 23:
-#line 244 "jucompiler.y"
+#line 245 "jucompiler.y"
     {
       (yyval.node) = newnode(MethodBody, NULL, line_count, col_count);
       addchildren((yyval.node), (yyvsp[(2) - (3)].list));
@@ -1824,12 +1825,12 @@ yyreduce:
     break;
 
   case 24:
-#line 251 "jucompiler.y"
+#line 252 "jucompiler.y"
     { (yyval.list) = newlist(); }
     break;
 
   case 25:
-#line 252 "jucompiler.y"
+#line 253 "jucompiler.y"
     {
       (yyval.list) = (yyvsp[(1) - (2)].list);
       // add non-NULL statements
@@ -1839,7 +1840,7 @@ yyreduce:
     break;
 
   case 26:
-#line 258 "jucompiler.y"
+#line 259 "jucompiler.y"
     {
       (yyval.list) = (yyvsp[(1) - (2)].list);
       struct node_list *var_list = (yyvsp[(2) - (2)].list);
@@ -1851,7 +1852,7 @@ yyreduce:
     break;
 
   case 27:
-#line 269 "jucompiler.y"
+#line 270 "jucompiler.y"
     {
       (yyval.list) = newlist();
 
@@ -1875,7 +1876,7 @@ yyreduce:
     break;
 
   case 28:
-#line 292 "jucompiler.y"
+#line 293 "jucompiler.y"
     {
       // check number of statements
       int count = 0;
@@ -1895,7 +1896,7 @@ yyreduce:
     break;
 
   case 29:
-#line 308 "jucompiler.y"
+#line 309 "jucompiler.y"
     {
       (yyval.node) = newnode(If, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(3) - (5)].node));
@@ -1908,7 +1909,7 @@ yyreduce:
     break;
 
   case 30:
-#line 317 "jucompiler.y"
+#line 318 "jucompiler.y"
     {
       (yyval.node) = newnode(If, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(3) - (7)].node));
@@ -1924,7 +1925,7 @@ yyreduce:
     break;
 
   case 31:
-#line 329 "jucompiler.y"
+#line 330 "jucompiler.y"
     {
       (yyval.node) = newnode(While, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(3) - (5)].node));
@@ -1933,14 +1934,14 @@ yyreduce:
     break;
 
   case 32:
-#line 334 "jucompiler.y"
+#line 335 "jucompiler.y"
     {
       (yyval.node) = newnode(Return, NULL, line_count, col_count);
     }
     break;
 
   case 33:
-#line 337 "jucompiler.y"
+#line 338 "jucompiler.y"
     {
       (yyval.node) = newnode(Return, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(2) - (3)].node));
@@ -1948,27 +1949,27 @@ yyreduce:
     break;
 
   case 34:
-#line 341 "jucompiler.y"
+#line 342 "jucompiler.y"
     { (yyval.node) = NULL; }
     break;
 
   case 35:
-#line 342 "jucompiler.y"
-    { (yyval.node) = (yyvsp[(1) - (2)].node); }
-    break;
-
-  case 36:
 #line 343 "jucompiler.y"
     { (yyval.node) = (yyvsp[(1) - (2)].node); }
     break;
 
-  case 37:
+  case 36:
 #line 344 "jucompiler.y"
     { (yyval.node) = (yyvsp[(1) - (2)].node); }
     break;
 
-  case 38:
+  case 37:
 #line 345 "jucompiler.y"
+    { (yyval.node) = (yyvsp[(1) - (2)].node); }
+    break;
+
+  case 38:
+#line 346 "jucompiler.y"
     {
       (yyval.node) = newnode(Print, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(3) - (5)].node));
@@ -1976,7 +1977,7 @@ yyreduce:
     break;
 
   case 39:
-#line 349 "jucompiler.y"
+#line 350 "jucompiler.y"
     {
       (yyval.node) = newnode(Print, NULL, line_count, col_count);
       addchild((yyval.node), newnode(StrLit, (yyvsp[(3) - (5)].val), line_count, col_count));
@@ -1984,17 +1985,17 @@ yyreduce:
     break;
 
   case 40:
-#line 353 "jucompiler.y"
+#line 354 "jucompiler.y"
     { (yyval.node) = NULL; }
     break;
 
   case 41:
-#line 357 "jucompiler.y"
+#line 358 "jucompiler.y"
     { (yyval.list) = newlist(); }
     break;
 
   case 42:
-#line 358 "jucompiler.y"
+#line 359 "jucompiler.y"
     {
       (yyval.list) = (yyvsp[(1) - (2)].list);
       if ((yyvsp[(2) - (2)].node) != NULL)
@@ -2003,7 +2004,7 @@ yyreduce:
     break;
 
   case 43:
-#line 366 "jucompiler.y"
+#line 367 "jucompiler.y"
     {
       (yyval.node) = newnode(Call, NULL, line_count, col_count);
       addchild((yyval.node), newnode(Identifier, (yyvsp[(1) - (3)].val), line_count, col_count));
@@ -2011,7 +2012,7 @@ yyreduce:
     break;
 
   case 44:
-#line 370 "jucompiler.y"
+#line 371 "jucompiler.y"
     {
       (yyval.node) = newnode(Call, NULL, line_count, col_count);
       addchild((yyval.node), newnode(Identifier, (yyvsp[(1) - (4)].val), line_count, col_count));
@@ -2020,7 +2021,7 @@ yyreduce:
     break;
 
   case 45:
-#line 375 "jucompiler.y"
+#line 376 "jucompiler.y"
     {
       (yyval.node) = newnode(Call, NULL, line_count, col_count);
       addchild((yyval.node), newnode(Identifier, (yyvsp[(1) - (4)].val), line_count, col_count));
@@ -2028,7 +2029,7 @@ yyreduce:
     break;
 
   case 46:
-#line 382 "jucompiler.y"
+#line 383 "jucompiler.y"
     {
       (yyval.list) = newlist();
       append((yyval.list), (yyvsp[(1) - (1)].node));
@@ -2036,7 +2037,7 @@ yyreduce:
     break;
 
   case 47:
-#line 386 "jucompiler.y"
+#line 387 "jucompiler.y"
     {
       (yyval.list) = (yyvsp[(1) - (3)].list);
       append((yyval.list), (yyvsp[(3) - (3)].node));
@@ -2044,7 +2045,7 @@ yyreduce:
     break;
 
   case 48:
-#line 393 "jucompiler.y"
+#line 394 "jucompiler.y"
     {
       (yyval.node) = newnode(Assign, NULL, line_count, col_count);
       addchild((yyval.node), newnode(Identifier, (yyvsp[(1) - (3)].val), line_count, col_count));
@@ -2053,7 +2054,7 @@ yyreduce:
     break;
 
   case 49:
-#line 401 "jucompiler.y"
+#line 402 "jucompiler.y"
     {
       (yyval.node) = newnode(ParseArgs, NULL, line_count, col_count);
       addchild((yyval.node), newnode(Identifier, (yyvsp[(3) - (7)].val), line_count, col_count));
@@ -2062,14 +2063,14 @@ yyreduce:
     break;
 
   case 50:
-#line 406 "jucompiler.y"
+#line 407 "jucompiler.y"
     {
       (yyval.node) = newnode(ParseArgs, NULL, line_count, col_count);
     }
     break;
 
   case 51:
-#line 412 "jucompiler.y"
+#line 413 "jucompiler.y"
     {
       (yyval.node) = newnode(Add, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2078,7 +2079,7 @@ yyreduce:
     break;
 
   case 52:
-#line 417 "jucompiler.y"
+#line 418 "jucompiler.y"
     {
       (yyval.node) = newnode(Sub, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2087,7 +2088,7 @@ yyreduce:
     break;
 
   case 53:
-#line 422 "jucompiler.y"
+#line 423 "jucompiler.y"
     {
       (yyval.node) = newnode(Mul, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2096,7 +2097,7 @@ yyreduce:
     break;
 
   case 54:
-#line 427 "jucompiler.y"
+#line 428 "jucompiler.y"
     {
       (yyval.node) = newnode(Div, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2105,7 +2106,7 @@ yyreduce:
     break;
 
   case 55:
-#line 432 "jucompiler.y"
+#line 433 "jucompiler.y"
     {
       (yyval.node) = newnode(Mod, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2114,7 +2115,7 @@ yyreduce:
     break;
 
   case 56:
-#line 437 "jucompiler.y"
+#line 438 "jucompiler.y"
     {
       (yyval.node) = newnode(And, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2123,7 +2124,7 @@ yyreduce:
     break;
 
   case 57:
-#line 442 "jucompiler.y"
+#line 443 "jucompiler.y"
     {
       (yyval.node) = newnode(Or, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2132,7 +2133,7 @@ yyreduce:
     break;
 
   case 58:
-#line 447 "jucompiler.y"
+#line 448 "jucompiler.y"
     {
       (yyval.node) = newnode(Xor, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2141,7 +2142,7 @@ yyreduce:
     break;
 
   case 59:
-#line 452 "jucompiler.y"
+#line 453 "jucompiler.y"
     {
       (yyval.node) = newnode(Lshift, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2150,7 +2151,7 @@ yyreduce:
     break;
 
   case 60:
-#line 457 "jucompiler.y"
+#line 458 "jucompiler.y"
     {
       (yyval.node) = newnode(Rshift, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2159,7 +2160,7 @@ yyreduce:
     break;
 
   case 61:
-#line 462 "jucompiler.y"
+#line 463 "jucompiler.y"
     {
       (yyval.node) = newnode(Eq, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2168,7 +2169,7 @@ yyreduce:
     break;
 
   case 62:
-#line 467 "jucompiler.y"
+#line 468 "jucompiler.y"
     {
       (yyval.node) = newnode(Ge, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2177,7 +2178,7 @@ yyreduce:
     break;
 
   case 63:
-#line 472 "jucompiler.y"
+#line 473 "jucompiler.y"
     {
       (yyval.node) = newnode(Gt, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2186,7 +2187,7 @@ yyreduce:
     break;
 
   case 64:
-#line 477 "jucompiler.y"
+#line 478 "jucompiler.y"
     {
       (yyval.node) = newnode(Le, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2195,7 +2196,7 @@ yyreduce:
     break;
 
   case 65:
-#line 482 "jucompiler.y"
+#line 483 "jucompiler.y"
     {
       (yyval.node) = newnode(Lt, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2204,7 +2205,7 @@ yyreduce:
     break;
 
   case 66:
-#line 487 "jucompiler.y"
+#line 488 "jucompiler.y"
     {
       (yyval.node) = newnode(Ne, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(1) - (3)].node)); // Expr1
@@ -2213,7 +2214,7 @@ yyreduce:
     break;
 
   case 67:
-#line 492 "jucompiler.y"
+#line 493 "jucompiler.y"
     {
       (yyval.node) = newnode(Minus, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(2) - (2)].node));
@@ -2221,7 +2222,7 @@ yyreduce:
     break;
 
   case 68:
-#line 496 "jucompiler.y"
+#line 497 "jucompiler.y"
     {
       (yyval.node) = newnode(Plus, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(2) - (2)].node));
@@ -2229,7 +2230,7 @@ yyreduce:
     break;
 
   case 69:
-#line 500 "jucompiler.y"
+#line 501 "jucompiler.y"
     {
       (yyval.node) = newnode(Not, NULL, line_count, col_count);
       addchild((yyval.node), (yyvsp[(2) - (2)].node));
@@ -2237,41 +2238,41 @@ yyreduce:
     break;
 
   case 70:
-#line 504 "jucompiler.y"
+#line 505 "jucompiler.y"
     { (yyval.node) = (yyvsp[(2) - (3)].node); }
     break;
 
   case 71:
-#line 505 "jucompiler.y"
+#line 506 "jucompiler.y"
     {
       (yyval.node) = NULL;
     }
     break;
 
   case 72:
-#line 508 "jucompiler.y"
-    { (yyval.node) = (yyvsp[(1) - (1)].node); }
-    break;
-
-  case 73:
 #line 509 "jucompiler.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
-  case 74:
+  case 73:
 #line 510 "jucompiler.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
-  case 75:
+  case 74:
 #line 511 "jucompiler.y"
+    { (yyval.node) = (yyvsp[(1) - (1)].node); }
+    break;
+
+  case 75:
+#line 512 "jucompiler.y"
     {
       (yyval.node) = newnode(Identifier, (yyvsp[(1) - (1)].val), line_count, col_count);
     }
     break;
 
   case 76:
-#line 514 "jucompiler.y"
+#line 515 "jucompiler.y"
     {
       (yyval.node) = newnode(Length, NULL, line_count, col_count);
       addchild((yyval.node), newnode(Identifier, (yyvsp[(1) - (2)].val), line_count, col_count));
@@ -2279,21 +2280,21 @@ yyreduce:
     break;
 
   case 77:
-#line 518 "jucompiler.y"
+#line 519 "jucompiler.y"
     {
       (yyval.node) = newnode(Natural, (yyvsp[(1) - (1)].val), line_count, col_count);
     }
     break;
 
   case 78:
-#line 521 "jucompiler.y"
+#line 522 "jucompiler.y"
     {
       (yyval.node) = newnode(Decimal, (yyvsp[(1) - (1)].val), line_count, col_count);
     }
     break;
 
   case 79:
-#line 524 "jucompiler.y"
+#line 525 "jucompiler.y"
     {
       (yyval.node) = newnode(BoolLit, (yyvsp[(1) - (1)].val), line_count, col_count);
     }
@@ -2301,7 +2302,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2305 "y.tab.c"
+#line 2306 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2515,11 +2516,13 @@ yyreturn:
 }
 
 
-#line 529 "jucompiler.y"
+#line 530 "jucompiler.y"
 
 
 void yyerror(char *s) {
     syntax_errors++;
-    printf("Line %d, col %d: %s: %s\n", line_count, col_count, s, yytext);
+    int col = (yytext[0] == '\0') ? col_count : string_col;
+    printf("Line %d, col %d: %s: %s\n", line_count, col, s, last_token_text[0] ? last_token_text : yytext);
+    last_token_text[0] = '\0'; //reset
 }
 

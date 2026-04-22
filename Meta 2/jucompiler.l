@@ -18,10 +18,12 @@
     int comment_line, comment_col;
     char string_buffer[1024];
     char string_content[1024]; // Second buffer to store only the string content without the STRLIT.
+    char last_token_text[1024];
     int string_line, string_col, string_error;
 
     int print = 0;
     void handle_token(char* token, int yyleng) {
+        string_col = col_count;
         col_count += yyleng;
         if (print)
             printf("%s\n", token);
@@ -87,7 +89,7 @@ String                  { handle_token("STRING", yyleng); return STRING; }
 if                      { handle_token("IF", yyleng); return IF; }
 else                    { handle_token("ELSE", yyleng); return ELSE; }
 
-true|false              { if (print) printf("BOOLLIT(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return BOOLLIT; }
+true|false              { string_col = col_count; if (print) printf("BOOLLIT(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return BOOLLIT; }
 
 class                   { handle_token("CLASS", yyleng); return CLASS; }
 public                  { handle_token("PUBLIC", yyleng); return PUBLIC; }
@@ -96,31 +98,96 @@ static                  { handle_token("STATIC", yyleng); return STATIC; }
 void                    { handle_token("VOID", yyleng); return VOID; }
 while                   { handle_token("WHILE", yyleng); return WHILE; }
 
-{reserved}              { if (print) printf("RESERVED(%s)\n", yytext); col_count += yyleng; return RESERVED;}
+{reserved}              { string_col = col_count; if (print) printf("RESERVED(%s)\n", yytext); col_count += yyleng; return RESERVED;}
 ".length"               { handle_token("DOTLENGTH", yyleng); return DOTLENGTH; }
 "System.out.print"      { handle_token("PRINT", yyleng); return PRINT; }
 "Integer.parseInt"      { handle_token("PARSEINT", yyleng); return PARSEINT; }
 
-{natural}               { if (print) printf("NATURAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return NATURAL; }
-{decimal}               { if (print) printf("DECIMAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return DECIMAL; }
-{identifier}            { if (print) printf("IDENTIFIER(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return IDENTIFIER; }
+{natural}               { string_col = col_count; if (print) printf("NATURAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return NATURAL; }
+{decimal}               { string_col = col_count; if (print) printf("DECIMAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return DECIMAL; }
+{identifier}            { string_col = col_count; if (print) printf("IDENTIFIER(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return IDENTIFIER; }
 "\r\n"                  { line_count++; col_count = 1; }
 "\r"                    { line_count++; col_count = 1; }
 "\n"                    { line_count++; col_count = 1; }
 {whitespace}            { col_count += yyleng; }
 
 \"                      { BEGIN(STR); string_buffer[0] = '\0'; strcat(string_buffer, "STRLIT(\""); string_content[0] = '\0'; strcat(string_content, "\""); string_line = line_count; string_col = col_count; col_count += yyleng; string_error = 0; }
-<STR>\"              { col_count += yyleng; if (!string_error) {strcat(string_buffer,"\")"); strcat(string_content,"\""); if (print) printf("%s\n", string_buffer); yylval.val = strdup(string_content);} BEGIN(INITIAL); if (!string_error) return STRLIT; }
-<STR>\\\r\n          { printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
-<STR>\\\r            { printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
-<STR>\\\n            { printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
-<STR>{escape_seq}    { strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); strncat(string_content, yytext, sizeof(string_content)-strlen(string_content)-1); col_count += yyleng; }
-<STR>\\.             { printf("Line %d, col %d: invalid escape sequence (%s)\n", line_count, col_count, yytext); col_count += yyleng; string_error = 1;}
-<STR>"\r\n"          { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL); }
-<STR>\n              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL); }
-<STR>\r              { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL);}
-<STR><<EOF>>         { printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); yyterminate(); }
-<STR>[^\\"\n\r]+	    { col_count += yyleng; strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); strncat(string_content, yytext, sizeof(string_content)-strlen(string_content)-1); }
+<STR>\" {
+        col_count += yyleng;
+        if (!string_error) {
+            strcat(string_buffer,"\")");
+            strcat(string_content,"\"");
+            if (print)
+                printf("%s\n", string_buffer);
+            yylval.val = strdup(string_content);
+            col_count = string_col;
+        } BEGIN(INITIAL);
+        if (!string_error) {
+            strncpy(last_token_text, string_content, sizeof(last_token_text)-1);
+            return STRLIT;
+        }
+    }
+<STR>\\\r\n {
+        printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count);
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        string_error = 1;
+        BEGIN(INITIAL);
+    }
+<STR>\\\r {
+        printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count);
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        string_error = 1;
+        BEGIN(INITIAL);
+    }
+<STR>\\\n {
+        printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count);
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        string_error = 1;
+        BEGIN(INITIAL);
+    }
+<STR>{escape_seq} {
+        strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1);
+        strncat(string_content, yytext, sizeof(string_content)-strlen(string_content)-1);
+        col_count += yyleng;
+    }
+<STR>\\. {
+        printf("Line %d, col %d: invalid escape sequence (%s)\n", line_count, col_count, yytext);
+        col_count += yyleng;
+        string_error = 1;
+    }
+<STR>"\r\n" {
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        BEGIN(INITIAL);
+    }
+<STR>\n {
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        BEGIN(INITIAL);
+    }
+<STR>\r {
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        BEGIN(INITIAL);
+    }
+<STR><<EOF>> {
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        yyterminate();
+    }
+<STR>[^\\"\n\r]+ {
+        col_count += yyleng;
+        strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1);
+        strncat(string_content, yytext, sizeof(string_content)-strlen(string_content)-1);
+    }
 
 <COMMENT1>"\r\n"        { line_count++; col_count = 1; BEGIN(INITIAL); }
 <COMMENT1>\r            { line_count++; col_count = 1; BEGIN(INITIAL); }

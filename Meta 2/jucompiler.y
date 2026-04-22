@@ -9,7 +9,8 @@
   extern int yylex(void);;
   void yyerror(char *);
   extern char *yytext;
-  extern int line_count, col_count;
+  extern char last_token_text[];
+  extern int line_count, col_count, string_col;
 
   struct node *root = NULL; // AST root
   int syntax_errors = 0;    // error counter
@@ -530,5 +531,7 @@ Expr
 
 void yyerror(char *s) {
     syntax_errors++;
-    printf("Line %d, col %d: %s: %s\n", line_count, col_count, s, yytext);
+    int col = (yytext[0] == '\0') ? col_count : string_col;
+    printf("Line %d, col %d: %s: %s\n", line_count, col, s, last_token_text[0] ? last_token_text : yytext);
+    last_token_text[0] = '\0'; //reset
 }

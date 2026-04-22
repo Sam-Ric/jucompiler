@@ -695,18 +695,20 @@ char *yytext;
     int comment_line, comment_col;
     char string_buffer[1024];
     char string_content[1024]; // Second buffer to store only the string content without the STRLIT.
+    char last_token_text[1024];
     int string_line, string_col, string_error;
 
     int print = 0;
     void handle_token(char* token, int yyleng) {
+        string_col = col_count;
         col_count += yyleng;
         if (print)
             printf("%s\n", token);
     }
 
-#line 707 "lex.yy.c"
-
 #line 709 "lex.yy.c"
+
+#line 711 "lex.yy.c"
 
 #define INITIAL 0
 #define COMMENT1 1
@@ -926,9 +928,9 @@ YY_DECL
 		}
 
 	{
-#line 44 "jucompiler.l"
+#line 46 "jucompiler.l"
 
-#line 931 "lex.yy.c"
+#line 933 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -987,402 +989,467 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 45 "jucompiler.l"
+#line 47 "jucompiler.l"
 { handle_token("LPAR", yyleng); return LPAR; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 46 "jucompiler.l"
+#line 48 "jucompiler.l"
 { handle_token("RPAR", yyleng); return RPAR; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 47 "jucompiler.l"
+#line 49 "jucompiler.l"
 { handle_token("LBRACE", yyleng); return LBRACE; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 48 "jucompiler.l"
+#line 50 "jucompiler.l"
 { handle_token("RBRACE", yyleng); return RBRACE; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 49 "jucompiler.l"
+#line 51 "jucompiler.l"
 { handle_token("LSQ", yyleng); return LSQ; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 50 "jucompiler.l"
+#line 52 "jucompiler.l"
 { handle_token("RSQ", yyleng); return RSQ; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 52 "jucompiler.l"
+#line 54 "jucompiler.l"
 { handle_token("EQ", yyleng); return EQ; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 53 "jucompiler.l"
+#line 55 "jucompiler.l"
 { handle_token("ASSIGN", yyleng); return ASSIGN; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 55 "jucompiler.l"
+#line 57 "jucompiler.l"
 { handle_token("GE", yyleng); return GE; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 56 "jucompiler.l"
+#line 58 "jucompiler.l"
 { handle_token("GT", yyleng); return GT; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 57 "jucompiler.l"
+#line 59 "jucompiler.l"
 { handle_token("LE", yyleng); return LE; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 58 "jucompiler.l"
+#line 60 "jucompiler.l"
 { handle_token("LT", yyleng); return LT; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 60 "jucompiler.l"
+#line 62 "jucompiler.l"
 { handle_token("NE", yyleng); return NE; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 61 "jucompiler.l"
+#line 63 "jucompiler.l"
 { handle_token("NOT", yyleng); return NOT; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 63 "jucompiler.l"
+#line 65 "jucompiler.l"
 { handle_token("COMMA", yyleng); return COMMA; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 64 "jucompiler.l"
+#line 66 "jucompiler.l"
 { handle_token("SEMICOLON", yyleng); return SEMICOLON; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 66 "jucompiler.l"
+#line 68 "jucompiler.l"
 { BEGIN(COMMENT1); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 67 "jucompiler.l"
+#line 69 "jucompiler.l"
 { BEGIN(COMMENT2); comment_line = line_count; comment_col = col_count; col_count += 2; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 69 "jucompiler.l"
+#line 71 "jucompiler.l"
 { handle_token("STAR", yyleng); return STAR; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 70 "jucompiler.l"
+#line 72 "jucompiler.l"
 { handle_token("DIV", yyleng); return DIV; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 71 "jucompiler.l"
+#line 73 "jucompiler.l"
 { handle_token("PLUS", yyleng); return PLUS; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 72 "jucompiler.l"
+#line 74 "jucompiler.l"
 { handle_token("MINUS", yyleng); return MINUS; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 73 "jucompiler.l"
+#line 75 "jucompiler.l"
 { handle_token("MOD", yyleng); return MOD; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 75 "jucompiler.l"
+#line 77 "jucompiler.l"
 { handle_token("AND", yyleng); return AND; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 76 "jucompiler.l"
+#line 78 "jucompiler.l"
 { handle_token("OR", yyleng); return OR; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 77 "jucompiler.l"
+#line 79 "jucompiler.l"
 { handle_token("ARROW", yyleng); return ARROW; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 78 "jucompiler.l"
+#line 80 "jucompiler.l"
 { handle_token("LSHIFT", yyleng); return LSHIFT; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 79 "jucompiler.l"
+#line 81 "jucompiler.l"
 { handle_token("RSHIFT", yyleng); return RSHIFT; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 80 "jucompiler.l"
+#line 82 "jucompiler.l"
 { handle_token("XOR", yyleng); return XOR; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 82 "jucompiler.l"
+#line 84 "jucompiler.l"
 { handle_token("INT", yyleng); return INT; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 83 "jucompiler.l"
+#line 85 "jucompiler.l"
 { handle_token("DOUBLE", yyleng); return DOUBLE; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 84 "jucompiler.l"
+#line 86 "jucompiler.l"
 { handle_token("BOOL", yyleng); return BOOL; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 85 "jucompiler.l"
+#line 87 "jucompiler.l"
 { handle_token("STRING", yyleng); return STRING; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 87 "jucompiler.l"
+#line 89 "jucompiler.l"
 { handle_token("IF", yyleng); return IF; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 88 "jucompiler.l"
+#line 90 "jucompiler.l"
 { handle_token("ELSE", yyleng); return ELSE; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 90 "jucompiler.l"
-{ if (print) printf("BOOLLIT(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return BOOLLIT; }
+#line 92 "jucompiler.l"
+{ string_col = col_count; if (print) printf("BOOLLIT(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return BOOLLIT; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 92 "jucompiler.l"
+#line 94 "jucompiler.l"
 { handle_token("CLASS", yyleng); return CLASS; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 93 "jucompiler.l"
+#line 95 "jucompiler.l"
 { handle_token("PUBLIC", yyleng); return PUBLIC; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 94 "jucompiler.l"
+#line 96 "jucompiler.l"
 { handle_token("RETURN", yyleng); return RETURN; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 95 "jucompiler.l"
+#line 97 "jucompiler.l"
 { handle_token("STATIC", yyleng); return STATIC; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 96 "jucompiler.l"
+#line 98 "jucompiler.l"
 { handle_token("VOID", yyleng); return VOID; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 97 "jucompiler.l"
+#line 99 "jucompiler.l"
 { handle_token("WHILE", yyleng); return WHILE; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 99 "jucompiler.l"
-{ if (print) printf("RESERVED(%s)\n", yytext); col_count += yyleng; return RESERVED;}
+#line 101 "jucompiler.l"
+{ string_col = col_count; if (print) printf("RESERVED(%s)\n", yytext); col_count += yyleng; return RESERVED;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 100 "jucompiler.l"
+#line 102 "jucompiler.l"
 { handle_token("DOTLENGTH", yyleng); return DOTLENGTH; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 101 "jucompiler.l"
+#line 103 "jucompiler.l"
 { handle_token("PRINT", yyleng); return PRINT; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 102 "jucompiler.l"
+#line 104 "jucompiler.l"
 { handle_token("PARSEINT", yyleng); return PARSEINT; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 104 "jucompiler.l"
-{ if (print) printf("NATURAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return NATURAL; }
+#line 106 "jucompiler.l"
+{ string_col = col_count; if (print) printf("NATURAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return NATURAL; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 105 "jucompiler.l"
-{ if (print) printf("DECIMAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return DECIMAL; }
+#line 107 "jucompiler.l"
+{ string_col = col_count; if (print) printf("DECIMAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return DECIMAL; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 106 "jucompiler.l"
-{ if (print) printf("IDENTIFIER(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return IDENTIFIER; }
+#line 108 "jucompiler.l"
+{ string_col = col_count; if (print) printf("IDENTIFIER(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return IDENTIFIER; }
 	YY_BREAK
 case 50:
 /* rule 50 can match eol */
 YY_RULE_SETUP
-#line 107 "jucompiler.l"
+#line 109 "jucompiler.l"
 { line_count++; col_count = 1; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 108 "jucompiler.l"
+#line 110 "jucompiler.l"
 { line_count++; col_count = 1; }
 	YY_BREAK
 case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
-#line 109 "jucompiler.l"
+#line 111 "jucompiler.l"
 { line_count++; col_count = 1; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 110 "jucompiler.l"
+#line 112 "jucompiler.l"
 { col_count += yyleng; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 112 "jucompiler.l"
+#line 114 "jucompiler.l"
 { BEGIN(STR); string_buffer[0] = '\0'; strcat(string_buffer, "STRLIT(\""); string_content[0] = '\0'; strcat(string_content, "\""); string_line = line_count; string_col = col_count; col_count += yyleng; string_error = 0; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 113 "jucompiler.l"
-{ col_count += yyleng; if (!string_error) {strcat(string_buffer,"\")"); strcat(string_content,"\""); if (print) printf("%s\n", string_buffer); yylval.val = strdup(string_content);} BEGIN(INITIAL); if (!string_error) return STRLIT; }
+#line 115 "jucompiler.l"
+{
+        col_count += yyleng;
+        if (!string_error) {
+            strcat(string_buffer,"\")");
+            strcat(string_content,"\"");
+            if (print)
+                printf("%s\n", string_buffer);
+            yylval.val = strdup(string_content);
+            col_count = string_col;
+        } BEGIN(INITIAL);
+        if (!string_error) {
+            strncpy(last_token_text, string_content, sizeof(last_token_text)-1);
+            return STRLIT;
+        }
+    }
 	YY_BREAK
 case 56:
 /* rule 56 can match eol */
 YY_RULE_SETUP
-#line 114 "jucompiler.l"
-{ printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
+#line 130 "jucompiler.l"
+{
+        printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count);
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        string_error = 1;
+        BEGIN(INITIAL);
+    }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 115 "jucompiler.l"
-{ printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
+#line 138 "jucompiler.l"
+{
+        printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count);
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        string_error = 1;
+        BEGIN(INITIAL);
+    }
 	YY_BREAK
 case 58:
 /* rule 58 can match eol */
 YY_RULE_SETUP
-#line 116 "jucompiler.l"
-{ printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count); printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; string_error = 1; BEGIN(INITIAL); }
+#line 146 "jucompiler.l"
+{
+        printf("Line %d, col %d: invalid escape sequence (\\)\n", line_count, col_count);
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        string_error = 1;
+        BEGIN(INITIAL);
+    }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 117 "jucompiler.l"
-{ strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); strncat(string_content, yytext, sizeof(string_content)-strlen(string_content)-1); col_count += yyleng; }
+#line 154 "jucompiler.l"
+{
+        strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1);
+        strncat(string_content, yytext, sizeof(string_content)-strlen(string_content)-1);
+        col_count += yyleng;
+    }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 118 "jucompiler.l"
-{ printf("Line %d, col %d: invalid escape sequence (%s)\n", line_count, col_count, yytext); col_count += yyleng; string_error = 1;}
+#line 159 "jucompiler.l"
+{
+        printf("Line %d, col %d: invalid escape sequence (%s)\n", line_count, col_count, yytext);
+        col_count += yyleng;
+        string_error = 1;
+    }
 	YY_BREAK
 case 61:
 /* rule 61 can match eol */
 YY_RULE_SETUP
-#line 119 "jucompiler.l"
-{ printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL); }
+#line 164 "jucompiler.l"
+{
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        BEGIN(INITIAL);
+    }
 	YY_BREAK
 case 62:
 /* rule 62 can match eol */
 YY_RULE_SETUP
-#line 120 "jucompiler.l"
-{ printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL); }
+#line 170 "jucompiler.l"
+{
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        BEGIN(INITIAL);
+    }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 121 "jucompiler.l"
-{ printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); line_count++; col_count = 1; BEGIN(INITIAL);}
+#line 176 "jucompiler.l"
+{
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        line_count++;
+        col_count = 1;
+        BEGIN(INITIAL);
+    }
 	YY_BREAK
 case YY_STATE_EOF(STR):
-#line 122 "jucompiler.l"
-{ printf("Line %d, col %d: unterminated string literal\n", string_line, string_col); yyterminate(); }
+#line 182 "jucompiler.l"
+{
+        printf("Line %d, col %d: unterminated string literal\n", string_line, string_col);
+        yyterminate();
+    }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 123 "jucompiler.l"
-{ col_count += yyleng; strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1); strncat(string_content, yytext, sizeof(string_content)-strlen(string_content)-1); }
+#line 186 "jucompiler.l"
+{
+        col_count += yyleng;
+        strncat(string_buffer, yytext, sizeof(string_buffer)-strlen(string_buffer)-1);
+        strncat(string_content, yytext, sizeof(string_content)-strlen(string_content)-1);
+    }
 	YY_BREAK
 case 65:
 /* rule 65 can match eol */
 YY_RULE_SETUP
-#line 125 "jucompiler.l"
+#line 192 "jucompiler.l"
 { line_count++; col_count = 1; BEGIN(INITIAL); }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 126 "jucompiler.l"
+#line 193 "jucompiler.l"
 { line_count++; col_count = 1; BEGIN(INITIAL); }
 	YY_BREAK
 case 67:
 /* rule 67 can match eol */
 YY_RULE_SETUP
-#line 127 "jucompiler.l"
+#line 194 "jucompiler.l"
 { line_count++; col_count = 1; BEGIN(INITIAL); }
 	YY_BREAK
 case YY_STATE_EOF(COMMENT1):
-#line 128 "jucompiler.l"
+#line 195 "jucompiler.l"
 { yyterminate(); }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 129 "jucompiler.l"
+#line 196 "jucompiler.l"
 { ; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 131 "jucompiler.l"
+#line 198 "jucompiler.l"
 { col_count += 2; BEGIN(INITIAL); }
 	YY_BREAK
 case 70:
 /* rule 70 can match eol */
 YY_RULE_SETUP
-#line 132 "jucompiler.l"
+#line 199 "jucompiler.l"
 { line_count++; col_count = 1; }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 133 "jucompiler.l"
+#line 200 "jucompiler.l"
 { line_count++; col_count = 1; }
 	YY_BREAK
 case 72:
 /* rule 72 can match eol */
 YY_RULE_SETUP
-#line 134 "jucompiler.l"
+#line 201 "jucompiler.l"
 { line_count++; col_count = 1; }
 	YY_BREAK
 case YY_STATE_EOF(COMMENT2):
-#line 135 "jucompiler.l"
+#line 202 "jucompiler.l"
 { printf("Line %d, col %d: unterminated comment\n", comment_line, comment_col); yyterminate(); }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 136 "jucompiler.l"
+#line 203 "jucompiler.l"
 { col_count++; }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 138 "jucompiler.l"
+#line 205 "jucompiler.l"
 { printf("Line %d, col %d: illegal character (%s)\n", line_count, col_count, yytext); col_count++; }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 139 "jucompiler.l"
+#line 206 "jucompiler.l"
 ECHO;
 	YY_BREAK
-#line 1385 "lex.yy.c"
+#line 1452 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2387,7 +2454,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 139 "jucompiler.l"
+#line 206 "jucompiler.l"
 
 extern int yylex();
 
