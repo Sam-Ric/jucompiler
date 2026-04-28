@@ -7,11 +7,12 @@
     /* place here any C variables and definitions */
     #include "y.tab.h"
     #include "ast.h"
+    #include "semantics.h"
     #include <string.h>
 
     extern int yyparse();
     extern int syntax_errors;
-    extern struct node *root;
+    extern struct node *ast;
     
     int line_count = 1;
     int col_count = 1;
@@ -40,6 +41,7 @@ identifier  [a-zA-Z_$][a-zA-Z0-9_$]*
 whitespace  [ \t\f]
 escape_seq  \\[fnrt\\\"]
 reserved    "++"|"--"|"null"|"Integer"|"System"|"abstract"|"assert"|"break"|"byte"|"case"|"catch"|"char"|"const"|"continue"|"default"|"do"|"enum"|"extends"|"final"|"finally"|"float"|"for"|"goto"|"implements"|"import"|"instanceof"|"interface"|"long"|"native"|"new"|"package"|"private"|"protected"|"short"|"strictfp"|"super"|"switch"|"synchronized"|"this"|"throw"|"throws"|"transient"|"try"|"volatile"
+
 %X COMMENT1
 %X COMMENT2
 %X STR
@@ -208,13 +210,22 @@ while                   { handle_token("WHILE", yyleng); return WHILE; }
 extern int yylex();
 
 int main(int argc, char** argv) {
-    int mode = 0; // 0: Default, 1: -l, 2: -e1, 3: -t, 4: -e2
+    /*
+        0: Default
+        1: -l
+        2: -e1
+        3: -t
+        4: -e2
+        5: -s
+    */
+    int mode = 0;
 
     if (argc > 1) {
         if (strcmp(argv[1], "-l") == 0) mode = 1;
         else if (strcmp(argv[1], "-e1") == 0) mode = 2;
         else if (strcmp(argv[1], "-t") == 0) mode = 3;
         else if (strcmp(argv[1], "-e2") == 0) mode = 4;
+        else if (strcmp(argv[1], "-s") == 0) mode =5;
     }
 
     if (mode == 1 || mode == 2) {
@@ -230,11 +241,21 @@ int main(int argc, char** argv) {
 
     if (mode == 3 && !syntax_errors) {
         // AST is printed if -t flag is used and theres no syntatical error
-        show(root, 0);
+        show(ast, 0);
+    }
+
+    if (mode == 5) {
+        // No syntax errors => execute semantic analysis
+        if (!syntax_errors) {
+            check_program(ast);
+            show_symbol_table();
+            printf("\n");
+        }
+        show(ast, 0);
     }
     
     // Memory free.
-    if (root) freenode(root);
+    if (ast) freenode(ast);
 
     return 0;
 }

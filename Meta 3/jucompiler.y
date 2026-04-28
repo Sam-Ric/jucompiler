@@ -12,7 +12,7 @@
   extern char last_token_text[];
   extern int line_count, col_count, string_col;
 
-  struct node *root = NULL; // AST root
+  struct node *ast = NULL; // AST root
   int syntax_errors = 0;    // error counter
 %}
 
@@ -114,7 +114,7 @@ Program
       $$ = newnode(Program, NULL, line_count, col_count);
       addchild($$, newnode(Identifier, $2, line_count, col_count)); // IDENTIFIER
       addchildren($$, $4); // all members from the list MemberList
-      root = $$;
+      ast = $$;
     }
   ;
 

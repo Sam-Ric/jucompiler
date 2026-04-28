@@ -185,7 +185,7 @@
   extern char last_token_text[];
   extern int line_count, col_count, string_col;
 
-  struct node *root = NULL; // AST root
+  struct node *ast = NULL; // AST root
   int syntax_errors = 0;    // error counter
 
 
@@ -1636,7 +1636,7 @@ yyreduce:
       (yyval.node) = newnode(Program, NULL, line_count, col_count);
       addchild((yyval.node), newnode(Identifier, (yyvsp[(2) - (5)].val), line_count, col_count)); // IDENTIFIER
       addchildren((yyval.node), (yyvsp[(4) - (5)].list)); // all members from the list MemberList
-      root = (yyval.node);
+      ast = (yyval.node);
     }
     break;
 
