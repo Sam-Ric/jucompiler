@@ -12,7 +12,7 @@
 
     extern int yyparse();
     extern int syntax_errors;
-    extern struct node *ast;
+    extern struct node *root;
     
     int line_count = 1;
     int col_count = 1;
@@ -24,9 +24,11 @@
 
     int print = 0;
     void handle_token(char* token, int yyleng) {
+        yylloc.first_line = line_count;
+        yylloc.first_column = col_count;
+
         string_col = col_count;
         col_count += yyleng;
-        strncpy(last_token_text, yytext, sizeof(last_token_text)-1);
         if (print)
             printf("%s\n", token);
     }
@@ -41,7 +43,6 @@ identifier  [a-zA-Z_$][a-zA-Z0-9_$]*
 whitespace  [ \t\f]
 escape_seq  \\[fnrt\\\"]
 reserved    "++"|"--"|"null"|"Integer"|"System"|"abstract"|"assert"|"break"|"byte"|"case"|"catch"|"char"|"const"|"continue"|"default"|"do"|"enum"|"extends"|"final"|"finally"|"float"|"for"|"goto"|"implements"|"import"|"instanceof"|"interface"|"long"|"native"|"new"|"package"|"private"|"protected"|"short"|"strictfp"|"super"|"switch"|"synchronized"|"this"|"throw"|"throws"|"transient"|"try"|"volatile"
-
 %X COMMENT1
 %X COMMENT2
 %X STR
@@ -92,7 +93,7 @@ String                  { handle_token("STRING", yyleng); return STRING; }
 if                      { handle_token("IF", yyleng); return IF; }
 else                    { handle_token("ELSE", yyleng); return ELSE; }
 
-true|false              { string_col = col_count; strncpy(last_token_text, yytext, sizeof(last_token_text)-1); if (print) printf("BOOLLIT(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return BOOLLIT; }
+true|false              { string_col = col_count; if (print) printf("BOOLLIT(%s)\n", yytext); yylloc.first_line = line_count;  yylloc.first_column = col_count; yylval.val = strdup(yytext); col_count += yyleng; return BOOLLIT; }
 
 class                   { handle_token("CLASS", yyleng); return CLASS; }
 public                  { handle_token("PUBLIC", yyleng); return PUBLIC; }
@@ -101,14 +102,14 @@ static                  { handle_token("STATIC", yyleng); return STATIC; }
 void                    { handle_token("VOID", yyleng); return VOID; }
 while                   { handle_token("WHILE", yyleng); return WHILE; }
 
-{reserved}              { string_col = col_count; strncpy(last_token_text, yytext, sizeof(last_token_text)-1); if (print) printf("RESERVED(%s)\n", yytext); col_count += yyleng; return RESERVED;}
+{reserved}              { string_col = col_count; if (print) printf("RESERVED(%s)\n", yytext); yylloc.first_line = line_count;  yylloc.first_column = col_count; col_count += yyleng; return RESERVED;}
 ".length"               { handle_token("DOTLENGTH", yyleng); return DOTLENGTH; }
 "System.out.print"      { handle_token("PRINT", yyleng); return PRINT; }
 "Integer.parseInt"      { handle_token("PARSEINT", yyleng); return PARSEINT; }
 
-{natural}               { string_col = col_count; strncpy(last_token_text, yytext, sizeof(last_token_text)-1); if (print) printf("NATURAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return NATURAL; }
-{decimal}               { string_col = col_count; strncpy(last_token_text, yytext, sizeof(last_token_text)-1); if (print) printf("DECIMAL(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return DECIMAL; }
-{identifier}            { string_col = col_count; strncpy(last_token_text, yytext, sizeof(last_token_text)-1); if (print) printf("IDENTIFIER(%s)\n", yytext); yylval.val = strdup(yytext); col_count += yyleng; return IDENTIFIER; }
+{natural}               { string_col = col_count; if (print) printf("NATURAL(%s)\n", yytext); yylloc.first_line = line_count;  yylloc.first_column = col_count; yylval.val = strdup(yytext); col_count += yyleng; return NATURAL; }
+{decimal}               { string_col = col_count; if (print) printf("DECIMAL(%s)\n", yytext); yylloc.first_line = line_count;  yylloc.first_column = col_count; yylval.val = strdup(yytext); col_count += yyleng; return DECIMAL; }
+{identifier}            { string_col = col_count; if (print) printf("IDENTIFIER(%s)\n", yytext); yylloc.first_line = line_count;  yylloc.first_column = col_count; yylval.val = strdup(yytext); col_count += yyleng; return IDENTIFIER; }
 "\r\n"                  { line_count++; col_count = 1; }
 "\r"                    { line_count++; col_count = 1; }
 "\n"                    { line_count++; col_count = 1; }
@@ -210,22 +211,15 @@ while                   { handle_token("WHILE", yyleng); return WHILE; }
 extern int yylex();
 
 int main(int argc, char** argv) {
-    /*
-        0: Default
-        1: -l
-        2: -e1
-        3: -t
-        4: -e2
-        5: -s
-    */
-    int mode = 0;
+    int mode = 0; // 0: Default, 1: -l, 2: -e1, 3: -t, 4: -e2
 
     if (argc > 1) {
         if (strcmp(argv[1], "-l") == 0) mode = 1;
         else if (strcmp(argv[1], "-e1") == 0) mode = 2;
         else if (strcmp(argv[1], "-t") == 0) mode = 3;
         else if (strcmp(argv[1], "-e2") == 0) mode = 4;
-        else if (strcmp(argv[1], "-s") == 0) mode =5;
+        else if (strcmp(argv[1], "-s") == 0) mode = 5;
+        else if (strcmp(argv[1], "-e3") == 0) mode = 6;
     }
 
     if (mode == 1 || mode == 2) {
@@ -239,28 +233,22 @@ int main(int argc, char** argv) {
     // Invocation of the parser
     yyparse(); 
 
-    if (mode == 3 && !syntax_errors) {
-        // AST is printed if -t flag is used and theres no syntatical error
-        show(ast, 0);
-    }
-
-    if (mode == 5) {
-        // No syntax errors => execute semantic analysis
-        if (!syntax_errors) {
-            check_program(ast);
-            show_symbol_table();
-            printf("\n");
+    if (mode == 3 && !syntax_errors) show(root, 0);
+        else if (!syntax_errors && (mode == 5 || mode == 6 || mode == 0)) {
+            semantic_analysis(root); // build tables, analyse types
+            if (mode == 5) { 
+                print_tables();
+                printf("\n");
+                show_annotated(root, 0); }
+            // mode 6: only errors
         }
-        show(ast, 0);
-    }
     
     // Memory free.
-    if (ast) freenode(ast);
+    if (root) freenode(root);
 
     return 0;
 }
 
 int yywrap() {  /* called on EOF, return 1 to terminate */
-    last_token_text[0] = '\0';
     return 1;
 }

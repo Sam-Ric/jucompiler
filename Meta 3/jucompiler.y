@@ -12,7 +12,7 @@
   extern char last_token_text[];
   extern int line_count, col_count, string_col;
 
-  struct node *ast = NULL; // AST root
+  struct node *root = NULL; // AST root
   int syntax_errors = 0;    // error counter
 %}
 
@@ -79,6 +79,8 @@
 %token<val> STRLIT
 %token<val> BOOLLIT
 
+%locations
+
 // Precedências
 
 %nonassoc LOWER_THAN_ELSE
@@ -103,7 +105,6 @@
 %type<node> Assignment ParseArgs Expr
 %type<list> MemberList StatementOrVarDecl StatementList IdentifierList
 %type<list> FormalParams ParamList ArgList FieldDecl VarDecl
-%type<node> ExprOrAssign
 
 
 // Grammar
@@ -111,10 +112,10 @@
 
 Program
   : CLASS IDENTIFIER LBRACE MemberList RBRACE {
-      $$ = newnode(Program, NULL, line_count, col_count);
-      addchild($$, newnode(Identifier, $2, line_count, col_count)); // IDENTIFIER
+      $$ = newnode(Program, NULL, @1.first_line, @1.first_column);
+      addchild($$, newnode(Identifier, $2, @2.first_line, @2.first_column)); // IDENTIFIER
       addchildren($$, $4); // all members from the list MemberList
-      ast = $$;
+      root = $$;
     }
   ;
 
@@ -139,7 +140,7 @@ MemberList
 
 MethodDecl
   : PUBLIC STATIC MethodHeader MethodBody {
-      $$ = newnode(MethodDecl, NULL, line_count, col_count);
+      $$ = newnode(MethodDecl, NULL, @1.first_line, @1.first_column);
       addchild($$, $3); // MethodHeader
       addchild($$, $4); // MethodBody
     }
@@ -149,18 +150,18 @@ FieldDecl
   : PUBLIC STATIC Type IDENTIFIER IdentifierList SEMICOLON {
       // first IDENTIFIER
       $$ = newlist();
-      struct node *field = newnode(FieldDecl, NULL, line_count, col_count);
+      struct node *field = newnode(FieldDecl, NULL,  @1.first_line, @1.first_column);
       addchild(field, $3);  // Type
-      addchild(field, newnode(Identifier, $4, line_count, col_count));  // IDENTIFIER
+      addchild(field, newnode(Identifier, $4, @4.first_line, @4.first_column));  // IDENTIFIER
       append($$, field);
 
       // create a list for additional IDENTIFIERs
       struct node_list *identifiers = $5;
       while ((identifiers = identifiers->next) != NULL) {
-        struct node *extra_field = newnode(FieldDecl, NULL, line_count, col_count);
+        struct node *extra_field = newnode(FieldDecl, NULL, @1.first_line, @1.first_column);
         // new Type node for each field
         enum category type_category = $3->category;
-        addchild(extra_field, newnode(type_category, NULL, line_count, col_count));
+        addchild(extra_field, newnode(type_category, NULL, @1.first_line, @1.first_column));
         addchild(extra_field, identifiers->node); // IDENTIFIER
         append($$, extra_field);
       }
@@ -173,42 +174,42 @@ IdentifierList
   : /* empty */ { $$ = newlist(); }
   | IdentifierList COMMA IDENTIFIER {
       $$ = $1;
-      append($$, newnode(Identifier, $3, line_count, col_count));
+      append($$, newnode(Identifier, $3, @3.first_line, @3.first_column));
     }
   ;
 
 Type
-  : BOOL    { $$ = newnode(Bool, NULL, line_count, col_count); }
-  | INT     { $$ = newnode(Int, NULL, line_count, col_count); }
-  | DOUBLE  { $$ = newnode(Double, NULL, line_count, col_count); }
+  : BOOL    { $$ = newnode(Bool, NULL, @1.first_line, @1.first_column); }
+  | INT     { $$ = newnode(Int, NULL, @1.first_line, @1.first_column); }
+  | DOUBLE  { $$ = newnode(Double, NULL, @1.first_line, @1.first_column); }
   ;
 
 MethodHeader
   : Type IDENTIFIER LPAR RPAR {
-      $$ = newnode(MethodHeader, NULL, line_count, col_count);
+      $$ = newnode(MethodHeader, NULL, @1.first_line, @1.first_column);
       addchild($$, $1);
-      addchild($$, newnode(Identifier, $2, line_count, col_count));
-      addchild($$, newnode(MethodParams, NULL, line_count, col_count));
+      addchild($$, newnode(Identifier, $2, @2.first_line, @2.first_column));
+      addchild($$, newnode(MethodParams, NULL, @3.first_line, @3.first_column));
     }
   | Type IDENTIFIER LPAR FormalParams RPAR {
-      $$ = newnode(MethodHeader, NULL, line_count, col_count);
+      $$ = newnode(MethodHeader, NULL, @1.first_line, @1.first_column);
       addchild($$, $1);
-      addchild($$, newnode(Identifier, $2, line_count, col_count));
-      struct node *params = newnode(MethodParams, NULL, line_count, col_count);
+      addchild($$, newnode(Identifier, $2, @2.first_line, @2.first_column));
+      struct node *params = newnode(MethodParams, NULL, @3.first_line, @3.first_column);
       addchildren(params, $4);
       addchild($$, params);
     }
   | VOID IDENTIFIER LPAR RPAR {
-      $$ = newnode(MethodHeader, NULL, line_count, col_count);
-      addchild($$, newnode(Void, NULL, line_count, col_count));
-      addchild($$, newnode(Identifier, $2, line_count, col_count));
-      addchild($$, newnode(MethodParams, NULL, line_count, col_count));
+      $$ = newnode(MethodHeader, NULL, @1.first_line, @1.first_column);
+      addchild($$, newnode(Void, NULL, @1.first_line, @1.first_column));
+      addchild($$, newnode(Identifier, $2, @2.first_line, @2.first_column));
+      addchild($$, newnode(MethodParams, NULL, @3.first_line, @3.first_column));
     }
   | VOID IDENTIFIER LPAR FormalParams RPAR {
-      $$ = newnode(MethodHeader, NULL, line_count, col_count);
-      addchild($$, newnode(Void, NULL, line_count, col_count));
-      addchild($$, newnode(Identifier, $2, line_count, col_count));
-      struct node *params = newnode(MethodParams, NULL, line_count, col_count);
+      $$ = newnode(MethodHeader, NULL, @1.first_line, @1.first_column);
+      addchild($$, newnode(Void, NULL, @1.first_line, @1.first_column));
+      addchild($$, newnode(Identifier, $2, @2.first_line, @2.first_column));
+      struct node *params = newnode(MethodParams, NULL, @3.first_line, @3.first_column);
       addchildren(params, $4);
       addchild($$, params);
     }
@@ -218,9 +219,9 @@ FormalParams
   : ParamList { $$ = $1; }
   | STRING LSQ RSQ IDENTIFIER {
       $$ = newlist();
-      struct node *param = newnode(ParamDecl, NULL, line_count, col_count);
-      addchild(param, newnode(StringArray, NULL, line_count, col_count));
-      addchild(param, newnode(Identifier, $4, line_count, col_count));
+      struct node *param = newnode(ParamDecl, NULL, @1.first_line, @1.first_column);
+      addchild(param, newnode(StringArray, NULL, @1.first_line, @1.first_column));
+      addchild(param, newnode(Identifier, $4, @4.first_line, @4.first_column));
       append($$, param);
     }
   ;
@@ -228,23 +229,23 @@ FormalParams
 ParamList
   : Type IDENTIFIER {
       $$ = newlist();
-      struct node *param = newnode(ParamDecl, NULL, line_count, col_count);
+      struct node *param = newnode(ParamDecl, NULL, @1.first_line, @1.first_column);
       addchild(param, $1); // Type
-      addchild(param, newnode(Identifier, $2, line_count, col_count)); // IDENTIFIER
+      addchild(param, newnode(Identifier, $2, @2.first_line, @2.first_column)); // IDENTIFIER
       append($$, param);
     }
   | ParamList COMMA Type IDENTIFIER {
       $$ = $1;
-      struct node *param = newnode(ParamDecl, NULL, line_count, col_count);
+      struct node *param = newnode(ParamDecl, NULL, @3.first_line, @3.first_column);
       addchild(param, $3); // Type
-      addchild(param, newnode(Identifier, $4, line_count, col_count)); // IDENTIFIER
+      addchild(param, newnode(Identifier, $4, @4.first_line, @4.first_column)); // IDENTIFIER
       append($$, param);
     }
   ;
 
 MethodBody
   : LBRACE StatementOrVarDecl RBRACE {
-      $$ = newnode(MethodBody, NULL, line_count, col_count);
+      $$ = newnode(MethodBody, NULL, @1.first_line, @1.first_column);
       addchildren($$, $2);
     }
   ;
@@ -272,17 +273,17 @@ VarDecl
       $$ = newlist();
 
       // first Var
-      struct node *var = newnode(VarDecl, NULL, line_count, col_count);
+      struct node *var = newnode(VarDecl, NULL, @1.first_line, @1.first_column);
       addchild(var, $1);
-      addchild(var, newnode(Identifier, $2, line_count, col_count));
+      addchild(var, newnode(Identifier, $2, @2.first_line, @2.first_column));
       append($$, var);
 
       // additional Vars
       struct node_list *identifiers = $3;
       while ((identifiers = identifiers->next) != NULL) {
-        struct node *extra_var = newnode(VarDecl, NULL, line_count, col_count);
+        struct node *extra_var = newnode(VarDecl, NULL, @1.first_line, @1.first_column);
         enum category type_category = $1->category;
-        addchild(extra_var, newnode(type_category, NULL, line_count, col_count));
+        addchild(extra_var, newnode(type_category, NULL, @1.first_line, @1.first_column));
         addchild(extra_var, identifiers->node);
         append($$, extra_var);
       }
@@ -303,61 +304,58 @@ Statement
         $$ = $2->next->node;
         free($2);
       } else {
-        $$ = newnode(Block, NULL, line_count, col_count);
+        $$ = newnode(Block, NULL, @1.first_line, @1.first_column);
         addchildren($$, $2);
       }
     }
-  | IF LPAR ExprOrAssign RPAR Statement %prec LOWER_THAN_ELSE {
-      $$ = newnode(If, NULL, line_count, col_count);
+  | IF LPAR Expr RPAR Statement %prec LOWER_THAN_ELSE {
+      $$ = newnode(If, NULL, @1.first_line, @1.first_column);
       addchild($$, $3);
       if ($5 != NULL)
         addchild($$, $5);
       else
-        addchild($$, newnode(Block, NULL, line_count, col_count));
-      addchild($$, newnode(Block, NULL, line_count, col_count));
+        addchild($$, newnode(Block, NULL, @1.first_line, @1.first_column));
+      addchild($$, newnode(Block, NULL, @1.first_line, @1.first_column));
     }
-  | IF LPAR ExprOrAssign RPAR Statement ELSE Statement {
-      $$ = newnode(If, NULL, line_count, col_count);
+  | IF LPAR Expr RPAR Statement ELSE Statement {
+      $$ = newnode(If, NULL, @1.first_line, @1.first_column);
       addchild($$, $3);
       if ($5 != NULL)
         addchild($$, $5);
       else
-        addchild($$, newnode(Block, NULL, line_count, col_count));
+        addchild($$, newnode(Block, NULL, @1.first_line, @1.first_column));
       if ($7 != NULL)
         addchild($$, $7);
       else
-        addchild($$, newnode(Block, NULL, line_count, col_count));
+        addchild($$, newnode(Block, NULL, @1.first_line, @1.first_column));
     }
-  | WHILE LPAR ExprOrAssign RPAR Statement {
-      $$ = newnode(While, NULL, line_count, col_count);
+  | WHILE LPAR Expr RPAR Statement {
+      $$ = newnode(While, NULL, @1.first_line, @1.first_column);
       addchild($$, $3);
       if ($5 != NULL)
         addchild($$, $5);
       else
-        addchild($$, newnode(Block, NULL, line_count, col_count));
+        addchild($$, newnode(Block, NULL, @1.first_line, @1.first_column));
     }
   | RETURN SEMICOLON {
-      $$ = newnode(Return, NULL, line_count, col_count);
+      $$ = newnode(Return, NULL, @1.first_line, @1.first_column);
     }
-  | RETURN ExprOrAssign SEMICOLON {
-      $$ = newnode(Return, NULL, line_count, col_count);
+  | RETURN Expr SEMICOLON {
+      $$ = newnode(Return, NULL, @1.first_line, @1.first_column);
       addchild($$, $2);
     }
   | SEMICOLON { $$ = NULL; } // empty statement
   | MethodInvocation SEMICOLON { $$ = $1; }
   | Assignment SEMICOLON { $$ = $1; }
   | ParseArgs SEMICOLON { $$ = $1; }
-  | PRINT LPAR ExprOrAssign RPAR SEMICOLON {
-      $$ = newnode(Print, NULL, line_count, col_count);
+  | PRINT LPAR Expr RPAR SEMICOLON {
+      $$ = newnode(Print, NULL, @1.first_line, @1.first_column);
       addchild($$, $3);
     }
   | PRINT LPAR STRLIT RPAR SEMICOLON {
-      $$ = newnode(Print, NULL, line_count, col_count);
-      addchild($$, newnode(StrLit, $3, line_count, col_count));
+      $$ = newnode(Print, NULL, @1.first_line, @1.first_column);
+      addchild($$, newnode(StrLit, $3, @3.first_line, @3.first_column));
     }
-  | IF LPAR error RPAR Statement %prec LOWER_THAN_ELSE  { $$ = NULL; }
-  | IF LPAR error RPAR Statement ELSE Statement         { $$ = NULL; }
-  | WHILE LPAR error RPAR Statement                     { $$ = NULL; }
   | error SEMICOLON { $$ = NULL; } // errors are not added to the AST
   ;
 
@@ -370,171 +368,167 @@ StatementList
     }
   ;
 
-ExprOrAssign
-  : Expr        { $$ = $1; }
-  | Assignment  { $$ = $1; }
-  ;
-
 MethodInvocation
   : IDENTIFIER LPAR RPAR {
-      $$ = newnode(Call, NULL, line_count, col_count);
-      addchild($$, newnode(Identifier, $1, line_count, col_count));
+      $$ = newnode(Call, NULL, @1.first_line, @1.first_column);
+      addchild($$, newnode(Identifier, $1, @1.first_line, @1.first_column));
     }
   | IDENTIFIER LPAR ArgList RPAR {
-      $$ = newnode(Call, NULL, line_count, col_count);
-      addchild($$, newnode(Identifier, $1, line_count, col_count));
+      $$ = newnode(Call, NULL, @1.first_line, @1.first_column);
+      addchild($$, newnode(Identifier, $1, @1.first_line, @1.first_column));
       addchildren($$, $3);
     }
   | IDENTIFIER LPAR error RPAR {
-      $$ = newnode(Call, NULL, line_count, col_count);
-      addchild($$, newnode(Identifier, $1, line_count, col_count));
+      $$ = newnode(Call, NULL, @1.first_line, @1.first_column);
+      addchild($$, newnode(Identifier, $1, @1.first_line, @1.first_column));
     }
   ;
 
 ArgList
-  : ExprOrAssign {
+  : Expr {
       $$ = newlist();
       append($$, $1);
     }
-  | ArgList COMMA ExprOrAssign {
+  | ArgList COMMA Expr {
       $$ = $1;
       append($$, $3);
     }
   ;
 
 Assignment
-  : IDENTIFIER ASSIGN ExprOrAssign {
-      $$ = newnode(Assign, NULL, line_count, col_count);
-      addchild($$, newnode(Identifier, $1, line_count, col_count));
+  : IDENTIFIER ASSIGN Expr {
+      $$ = newnode(Assign, NULL, @2.first_line, @2.first_column);
+      addchild($$, newnode(Identifier, $1, @1.first_line, @1.first_column));
       addchild($$, $3);
     }
   ;
 
 ParseArgs
-  : PARSEINT LPAR IDENTIFIER LSQ ExprOrAssign RSQ RPAR {
-      $$ = newnode(ParseArgs, NULL, line_count, col_count);
-      addchild($$, newnode(Identifier, $3, line_count, col_count));
+  : PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR {
+      $$ = newnode(ParseArgs, NULL, @1.first_line, @1.first_column);
+      addchild($$, newnode(Identifier, $3, @3.first_line, @3.first_column));
       addchild($$, $5);
     }
   | PARSEINT LPAR error RPAR {
-      $$ = newnode(ParseArgs, NULL, line_count, col_count);
+      $$ = newnode(ParseArgs, NULL, @1.first_line, @1.first_column);
     }
   ;
 
 Expr
   : Expr PLUS   Expr {
-      $$ = newnode(Add, NULL, line_count, col_count);
+      $$ = newnode(Add, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr MINUS  Expr {
-      $$ = newnode(Sub, NULL, line_count, col_count);
+      $$ = newnode(Sub, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr STAR   Expr {
-      $$ = newnode(Mul, NULL, line_count, col_count);
+      $$ = newnode(Mul, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr DIV    Expr {
-      $$ = newnode(Div, NULL, line_count, col_count);
+      $$ = newnode(Div, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr MOD    Expr {
-      $$ = newnode(Mod, NULL, line_count, col_count);
+      $$ = newnode(Mod, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr AND    Expr {
-      $$ = newnode(And, NULL, line_count, col_count);
+      $$ = newnode(And, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr OR     Expr {
-      $$ = newnode(Or, NULL, line_count, col_count);
+      $$ = newnode(Or, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr XOR    Expr {
-      $$ = newnode(Xor, NULL, line_count, col_count);
+      $$ = newnode(Xor, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr LSHIFT Expr {
-      $$ = newnode(Lshift, NULL, line_count, col_count);
+      $$ = newnode(Lshift, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr RSHIFT Expr {
-      $$ = newnode(Rshift, NULL, line_count, col_count);
+      $$ = newnode(Rshift, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr EQ     Expr {
-      $$ = newnode(Eq, NULL, line_count, col_count);
+      $$ = newnode(Eq, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr GE     Expr {
-      $$ = newnode(Ge, NULL, line_count, col_count);
+      $$ = newnode(Ge, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr GT     Expr {
-      $$ = newnode(Gt, NULL, line_count, col_count);
+      $$ = newnode(Gt, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr LE     Expr {
-      $$ = newnode(Le, NULL, line_count, col_count);
+      $$ = newnode(Le, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr LT     Expr {
-      $$ = newnode(Lt, NULL, line_count, col_count);
+      $$ = newnode(Lt, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | Expr NE     Expr {
-      $$ = newnode(Ne, NULL, line_count, col_count);
+      $$ = newnode(Ne, NULL, @2.first_line, @2.first_column);
       addchild($$, $1); // Expr1
       addchild($$, $3); // Expr2
     }
   | MINUS Expr            %prec UNARY {
-      $$ = newnode(Minus, NULL, line_count, col_count);
+      $$ = newnode(Minus, NULL, @1.first_line, @1.first_column);
       addchild($$, $2);
     }
   | PLUS  Expr            %prec UNARY {
-      $$ = newnode(Plus, NULL, line_count, col_count);
+      $$ = newnode(Plus, NULL, @1.first_line, @1.first_column);
       addchild($$, $2);
     }
   | NOT   Expr            %prec UNARY {
-      $$ = newnode(Not, NULL, line_count, col_count);
+      $$ = newnode(Not, NULL, @1.first_line, @1.first_column);
       addchild($$, $2);
     }
-  | LPAR ExprOrAssign RPAR { $$ = $2; }
+  | LPAR Expr RPAR { $$ = $2; }
   | LPAR error RPAR {
       $$ = NULL;
     }
   | MethodInvocation { $$ = $1; }
+  | Assignment { $$ = $1; }
   | ParseArgs { $$ = $1; }
   | IDENTIFIER {
-      $$ = newnode(Identifier, $1, line_count, col_count);
+      $$ = newnode(Identifier, $1, @1.first_line, @1.first_column);
     }
   | IDENTIFIER DOTLENGTH {
-      $$ = newnode(Length, NULL, line_count, col_count);
-      addchild($$, newnode(Identifier, $1, line_count, col_count));
+      $$ = newnode(Length, NULL, @2.first_line, @2.first_column);
+      addchild($$, newnode(Identifier, $1, @1.first_line, @1.first_column));
     }
   | NATURAL {
-      $$ = newnode(Natural, $1, line_count, col_count);
+      $$ = newnode(Natural, $1, @1.first_line, @1.first_column);
     }
   | DECIMAL {
-      $$ = newnode(Decimal, $1, line_count, col_count);
+      $$ = newnode(Decimal, $1, @1.first_line, @1.first_column);
     }
   | BOOLLIT {
-      $$ = newnode(BoolLit, $1, line_count, col_count);
+      $$ = newnode(BoolLit, $1, @1.first_line, @1.first_column);
     }
   ;
 
@@ -543,6 +537,6 @@ Expr
 void yyerror(char *s) {
     syntax_errors++;
     int col = (yytext[0] == '\0') ? col_count : string_col;
-    printf("Line %d, col %d: %s: %s\n", line_count, col, s, last_token_text);
+    printf("Line %d, col %d: %s: %s\n", line_count, col, s, last_token_text[0] ? last_token_text : yytext);
     last_token_text[0] = '\0'; //reset
 }

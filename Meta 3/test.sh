@@ -19,7 +19,7 @@ for java_file in "$TEST_PATH"/*.java; do
 
     [ ! -f "$expected_out" ] && continue
 
-    "$JUCOMPILER" -t < "$java_file" > "$actual_out" 2>&1
+    "$JUCOMPILER" -s < "$java_file" > "$actual_out" 2>&1
 
     if diff -q "$actual_out" "$expected_out" > /dev/null; then
         echo -e "${GREEN}PASS: $test_name${NC}"

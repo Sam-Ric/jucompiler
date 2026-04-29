@@ -38,6 +38,7 @@ struct node {
     char *token;
     int token_line, token_column;
     enum type type;
+    char *param_sig;
     struct node_list *children;
 };
 

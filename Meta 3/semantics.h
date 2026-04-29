@@ -1,19 +1,37 @@
-#ifndef _SEMANTICS_H
-#define _SEMANTICS_H
+/*
+João Tomás Correia Ferreira (2023217920)
+Samuel Marques Riça (2023206471)
+*/
+
+#ifndef SEMANTIC_H
+#define SEMANTIC_H
 
 #include "ast.h"
 
-int check_program(struct node *program);
+/*
+ * Run all three semantic passes (symbol-table construction + type checking).
+ * Errors are printed to stdout as they are encountered.
+ * Returns the total number of semantic errors found.
+ */
+int semantic_analysis(struct node *program);
 
-struct symbol_list {
-	char *identifier;
-	enum type type;
-	struct node *node;
-	struct symbol_list *next;
-};
+/*
+ * Print all symbol tables to stdout.
+ * Format: "===== Class/Method <sig> Symbol Table ====="
+ * Must be called after semantic_analysis().
+ */
+void print_tables(void);
 
-struct symbol_list *insert_symbol(struct symbol_list *symbol_table, char *identifier, enum type type, struct node *node);
-struct symbol_list *search_symbol(struct symbol_list *symbol_table, char *identifier);
-void show_symbol_table();
+/*
+ * Print the annotated AST to stdout.
+ * Expression nodes are annotated with " - <type>".
+ * Must be called after semantic_analysis().
+ */
+void show_annotated(struct node *node, int depth);
 
-#endif
+/* Utility exposed for use in jucompiler.y / code generation */
+const char *type_to_string(enum type t);
+enum type   category_to_type(enum category c);
+
+
+#endif /* SEMANTIC_H */

@@ -12,6 +12,7 @@ struct node *newnode(enum category category, char *token, int line, int col) {
     new->token = token;
     new->token_line = line;
     new->token_column = col;
+    new->param_sig = NULL;
     new->type = type_none;
     new->children = newlist();
     return new;
