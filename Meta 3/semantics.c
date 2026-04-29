@@ -316,24 +316,36 @@ static void build_global_table(struct node *program)
         {
             struct node *type_node = getchild(member, 0);
             struct node *id_node = getchild(member, 1);
-            enum type t = category_to_type(type_node->category);
-            symbol_entry *existing = find_symbol(gtable->symbols, id_node->token);
+            enum type v_type = category_to_type(type_node->category);
+
+            int already_defined = 0;
+            symbol_entry *s = gtable->symbols;
+            while (s)
+            {
+                // Procura conflitos APENAS com outras variáveis globais, ignora os métodos!
+                if (!s->is_method && strcmp(s->name, id_node->token) == 0)
+                {
+                    already_defined = 1;
+                    break;
+                }
+                s = s->next;
+            }
 
             if (is_reserved_underscore(id_node->token))
             {
                 printf("Line %d, col %d: Symbol _ is reserved\n", id_node->token_line, id_node->token_column);
                 sem_errors++;
+                member->type = type_undef;
             }
-            else if (existing && !existing->is_method)
+            else if (already_defined)
             {
-                printf("Line %d, col %d: Symbol %s already defined\n",
-                       id_node->token_line, id_node->token_column, id_node->token);
+                printf("Line %d, col %d: Symbol %s already defined\n", id_node->token_line, id_node->token_column, id_node->token);
                 sem_errors++;
+                member->type = type_undef;
             }
             else
             {
-                add_symbol(&gtable->symbols, id_node->token, t, 0, 0,
-                           id_node->token_line, id_node->token_column);
+                add_symbol(&gtable->symbols, id_node->token, v_type, 0, 0, id_node->token_line, id_node->token_column);
             }
         }
         else if (member->category == MethodDecl)
@@ -352,7 +364,13 @@ static void build_global_table(struct node *program)
             {
                 struct node *pt = getchild(pd, 0); /* type child of ParamDecl */
                 struct node *pid = getchild(pd, 1);
-                if (param_name_exists_in_node(params_node, pid->token, pidx - 1))
+                if (is_reserved_underscore(pid->token))
+                {
+                    printf("Line %d, col %d: Symbol _ is reserved\n",
+                           pid->token_line, pid->token_column);
+                    sem_errors++;
+                }
+                else if (param_name_exists_in_node(params_node, pid->token, pidx - 1))
                 {
                     printf("Line %d, col %d: Symbol %s already defined\n",
                            pid->token_line, pid->token_column, pid->token);
@@ -360,6 +378,13 @@ static void build_global_table(struct node *program)
                 }
                 add_param(&method_params,
                           type_to_string(category_to_type(pt->category)));
+            }
+
+            if (is_reserved_underscore(id_node->token))
+            {
+                printf("Line %d, col %d: Symbol _ is reserved\n",
+                       id_node->token_line, id_node->token_column);
+                sem_errors++;
             }
 
             if (find_method_by_sig(gtable->symbols, id_node->token, method_params))
@@ -422,12 +447,7 @@ static void populate_method_tables(struct node *program)
             struct node *pid = getchild(pd, 1);
             enum type p_type = category_to_type(pt->category);
 
-            if (is_reserved_underscore(pid->token))
-            {
-                printf("Line %d, col %d: Symbol _ is reserved\n", pid->token_line, pid->token_column);
-                sem_errors++;
-            }
-            else if (!find_symbol(mt->symbols, pid->token))
+            if (!is_reserved_underscore(pid->token) && !find_symbol(mt->symbols, pid->token))
             {
                 add_symbol(&mt->symbols, pid->token, p_type, 0, 1,
                            pid->token_line, pid->token_column);
@@ -542,6 +562,7 @@ static void check_expression(struct node *expr, method_table *mt)
             int is_zero = 1;
             for (int i = 0; cleaned[i] != '\0'; i++)
             {
+                if (cleaned[i] == 'e' || cleaned[i] == 'E') break;
                 if (cleaned[i] >= '1' && cleaned[i] <= '9')
                 {
                     is_zero = 0;
@@ -577,6 +598,14 @@ static void check_expression(struct node *expr, method_table *mt)
 
     case Identifier:
     {
+        if (is_reserved_underscore(expr->token))
+        {
+            printf("Line %d, col %d: Symbol %s is reserved\n",
+                   expr->token_line, expr->token_column, expr->token);
+            sem_errors++;
+            expr->type = type_undef;
+            break;
+        }
         symbol_entry *sym = find_variable(mt, expr->token);
         if (!sym)
         {
@@ -964,21 +993,16 @@ static void check_statement(struct node *stmt, method_table *mt)
         break;
     }
 
-    case Print:
-    {
-        struct node *expr_to_print = getchild(stmt, 0);
-        check_expression(expr_to_print, mt);
-
-        if (expr_to_print->type != type_int &&
-            expr_to_print->type != type_double &&
-            expr_to_print->type != type_boolean &&
-            expr_to_print->category != StrLit)
-        {
-
-            printf("Line %d, col %d: Incompatible type %s in System.out.print statement\n",
-                   expr_to_print->token_line, expr_to_print->token_column,
-                   type_to_string(expr_to_print->type));
-            sem_errors++;
+    case Print: {
+        struct node *child = getchild(stmt, 0);
+        if (child->category != StrLit) {
+            check_expression(child, mt);
+            // Só aceita int, double e boolean. Tudo o resto (void, String[], undef) dá erro!
+            if (child->type != type_int && child->type != type_double && child->type != type_boolean) {
+                printf("Line %d, col %d: Incompatible type %s in System.out.print statement\n",
+                    child->token_line, child->token_column, type_to_string(child->type));
+                sem_errors++;
+            }
         }
         break;
     }

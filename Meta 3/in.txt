@@ -1,0 +1,19 @@
+class MethodTester {
+    public static void f(int a, double b) {}
+    public static void f(double a, int b) {}
+    public static int g() { return; }
+    public static void h() { return 1; }
+
+    public static void main(String[] args) {
+        int a;
+        f(1, 1);
+        f(1.0, 1.0);
+        a = g();
+        args = args;
+        args = h();
+        System.out.print(h());
+        a = a.length;
+        a = Integer.parseInt(args[1.0]);
+        a = Integer.parseInt(a[1]);
+    }
+}

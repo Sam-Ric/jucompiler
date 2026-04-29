@@ -1,25 +1,82 @@
-Line 14, col 11: Operator = cannot be applied to types int, double
-Line 15, col 11: Operator = cannot be applied to types int, double
-Line 17, col 15: Operator + cannot be applied to types int, boolean
-Line 18, col 15: Operator - cannot be applied to types int, boolean
-Line 20, col 15: Operator + cannot be applied to types int, String[]
-Line 21, col 15: Operator - cannot be applied to types int, String[]
-Line 29, col 15: Operator + cannot be applied to types int, boolean
-Line 30, col 15: Operator - cannot be applied to types int, boolean
-Line 32, col 15: Operator + cannot be applied to types int, String[]
-Line 33, col 15: Operator - cannot be applied to types int, String[]
-===== Class sub_2_pewdiepie Symbol Table =====
+Line 4, col 29: Incompatible type void in return statement
+Line 5, col 37: Incompatible type int in return statement
+Line 9, col 9: Reference to method f(int,int) is ambiguous
+Line 10, col 9: Cannot find symbol f(double,double)
+Line 12, col 14: Operator = cannot be applied to types String[], String[]
+Line 13, col 14: Operator = cannot be applied to types String[], void
+Line 14, col 26: Incompatible type void in System.out.print statement
+Line 15, col 14: Operator .length cannot be applied to type int
+Line 16, col 13: Operator Integer.parseInt cannot be applied to types String[], double
+Line 17, col 13: Operator Integer.parseInt cannot be applied to types int, int
+===== Class MethodTester Symbol Table =====
+f	(int,double)	void
+f	(double,int)	void
+g	()	int
+h	()	void
 main	(String[])	void
+
+===== Method f(int,double) Symbol Table =====
+return		void
+a		int	param
+b		double	param
+
+===== Method f(double,int) Symbol Table =====
+return		void
+a		double	param
+b		int	param
+
+===== Method g() Symbol Table =====
+return		int
+
+===== Method h() Symbol Table =====
+return		void
 
 ===== Method main(String[]) Symbol Table =====
 return		void
 args		String[]	param
-i		int
-d		double
-b		boolean
+a		int
 
 Program
-..Identifier(sub_2_pewdiepie)
+..Identifier(MethodTester)
+..MethodDecl
+....MethodHeader
+......Void
+......Identifier(f)
+......MethodParams
+........ParamDecl
+..........Int
+..........Identifier(a)
+........ParamDecl
+..........Double
+..........Identifier(b)
+....MethodBody
+..MethodDecl
+....MethodHeader
+......Void
+......Identifier(f)
+......MethodParams
+........ParamDecl
+..........Double
+..........Identifier(a)
+........ParamDecl
+..........Int
+..........Identifier(b)
+....MethodBody
+..MethodDecl
+....MethodHeader
+......Int
+......Identifier(g)
+......MethodParams
+....MethodBody
+......Return
+..MethodDecl
+....MethodHeader
+......Void
+......Identifier(h)
+......MethodParams
+....MethodBody
+......Return
+........Natural(1) - int
 ..MethodDecl
 ....MethodHeader
 ......Void
@@ -31,99 +88,40 @@ Program
 ....MethodBody
 ......VarDecl
 ........Int
-........Identifier(i)
-......VarDecl
-........Double
-........Identifier(d)
-......VarDecl
-........Bool
-........Identifier(b)
-......Assign - int
-........Identifier(i) - int
+........Identifier(a)
+......Call - undef
+........Identifier(f) - undef
 ........Natural(1) - int
-......Assign - double
-........Identifier(d) - double
-........Decimal(1.1) - double
-......Assign - boolean
-........Identifier(b) - boolean
-........BoolLit(true) - boolean
+........Natural(1) - int
+......Call - undef
+........Identifier(f) - undef
+........Decimal(1.0) - double
+........Decimal(1.0) - double
 ......Assign - int
-........Identifier(i) - int
-........Add - int
-..........Identifier(i) - int
-..........Identifier(i) - int
+........Identifier(a) - int
+........Call - int
+..........Identifier(g) - ()
+......Assign - String[]
+........Identifier(args) - String[]
+........Identifier(args) - String[]
+......Assign - String[]
+........Identifier(args) - String[]
+........Call - void
+..........Identifier(h) - ()
+......Print
+........Call - void
+..........Identifier(h) - ()
 ......Assign - int
-........Identifier(i) - int
-........Sub - int
-..........Identifier(i) - int
-..........Identifier(i) - int
+........Identifier(a) - int
+........Length - int
+..........Identifier(a) - int
 ......Assign - int
-........Identifier(i) - int
-........Add - double
-..........Identifier(i) - int
-..........Identifier(d) - double
-......Assign - int
-........Identifier(i) - int
-........Sub - double
-..........Identifier(i) - int
-..........Identifier(d) - double
-......Assign - int
-........Identifier(i) - int
-........Add - undef
-..........Identifier(i) - int
-..........Identifier(b) - boolean
-......Assign - int
-........Identifier(i) - int
-........Sub - undef
-..........Identifier(i) - int
-..........Identifier(b) - boolean
-......Assign - int
-........Identifier(i) - int
-........Add - undef
-..........Identifier(i) - int
+........Identifier(a) - int
+........ParseArgs - int
 ..........Identifier(args) - String[]
+..........Decimal(1.0) - double
 ......Assign - int
-........Identifier(i) - int
-........Sub - undef
-..........Identifier(i) - int
-..........Identifier(args) - String[]
-......Assign - double
-........Identifier(d) - double
-........Add - int
-..........Identifier(i) - int
-..........Identifier(i) - int
-......Assign - double
-........Identifier(d) - double
-........Sub - int
-..........Identifier(i) - int
-..........Identifier(i) - int
-......Assign - double
-........Identifier(d) - double
-........Add - double
-..........Identifier(i) - int
-..........Identifier(d) - double
-......Assign - double
-........Identifier(d) - double
-........Sub - double
-..........Identifier(i) - int
-..........Identifier(d) - double
-......Assign - double
-........Identifier(d) - double
-........Add - undef
-..........Identifier(i) - int
-..........Identifier(b) - boolean
-......Assign - double
-........Identifier(d) - double
-........Sub - undef
-..........Identifier(i) - int
-..........Identifier(b) - boolean
-......Assign - double
-........Identifier(d) - double
-........Add - undef
-..........Identifier(i) - int
-..........Identifier(args) - String[]
-......Assign - double
-........Identifier(d) - double
-........Sub - undef
-..........Identifier(i) - int
-..........Identifier(args) - String[]
+........Identifier(a) - int
+........ParseArgs - int
+..........Identifier(a) - int
+..........Natural(1) - int

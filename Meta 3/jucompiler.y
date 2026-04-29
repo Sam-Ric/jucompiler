@@ -87,17 +87,15 @@
 %nonassoc ELSE
 
 %right ASSIGN
-
 %left OR
-%left XOR
 %left AND
+%left XOR
 %left EQ NE
-%left LT LE GT GE
+%left LT GT LE GE
 %left LSHIFT RSHIFT
 %left PLUS MINUS
 %left STAR DIV MOD
-
-%nonassoc UNARY
+%right NOT UNARY
 
 // Non-terminal symbols
 %type<node> Program MethodDecl MethodHeader MethodBody
