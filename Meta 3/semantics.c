@@ -534,57 +534,78 @@ static void check_expression(struct node *expr, method_table *mt)
 
     case Natural:
     {
-        char *cleaned = clean_num_literal(expr->token);
-        long long value = strtoll(cleaned, NULL, 10);
+        char buf[1024];
+        int j = 0;
+        for (int i = 0; expr->token[i] != '\0'; i++)
+        {
+            if (expr->token[i] != '_')
+            {
+                buf[j++] = expr->token[i];
+            }
+        }
+        buf[j] = '\0';
 
-        if (value > 2147483647LL)
+        unsigned long long val = strtoull(buf, NULL, 10);
+
+        if (val > 2147483647ULL)
         {
             printf("Line %d, col %d: Number %s out of bounds\n",
                    expr->token_line, expr->token_column, expr->token);
             sem_errors++;
         }
-
-        expr->type = type_int; // Sempre int na árvore
-        free(cleaned);
+        expr->type = type_int;
         break;
     }
-
     case Decimal:
     {
-        char *cleaned = clean_num_literal(expr->token);
-        char *endptr;
-        double val = strtod(cleaned, &endptr);
+        char buf[1024];
+        int j = 0;
+        for (int i = 0; expr->token[i] != '\0'; i++)
+        {
+            if (expr->token[i] != '_')
+            {
+                buf[j++] = expr->token[i];
+            }
+        }
+        buf[j] = '\0';
 
-        // 1. Se o valor for 0.0 mas o literal original não era zero (Underflow)
-        // 2. Se o valor for HUGE_VAL (Overflow)
-        if (val == 0.0)
+        double val = strtod(buf, NULL);
+        int out_of_bounds = 0;
+
+        if (isinf(val))
+        {
+            out_of_bounds = 1;
+        }
+
+        else if (val == 0.0)
         {
             int is_zero = 1;
-            for (int i = 0; cleaned[i] != '\0'; i++)
+
+            for (int i = 0; buf[i] != '\0'; i++)
             {
-                if (cleaned[i] == 'e' || cleaned[i] == 'E') break;
-                if (cleaned[i] >= '1' && cleaned[i] <= '9')
+                if (buf[i] == 'e' || buf[i] == 'E')
+                    break;
+                if (buf[i] >= '1' && buf[i] <= '9')
                 {
                     is_zero = 0;
                     break;
                 }
             }
+
             if (!is_zero)
             {
-                printf("Line %d, col %d: Number %s out of bounds\n",
-                       expr->token_line, expr->token_column, expr->token);
-                sem_errors++;
+                out_of_bounds = 1;
             }
         }
-        else if (val == HUGE_VAL || val == -HUGE_VAL)
+
+        if (out_of_bounds)
         {
             printf("Line %d, col %d: Number %s out of bounds\n",
                    expr->token_line, expr->token_column, expr->token);
             sem_errors++;
         }
 
-        expr->type = type_double; // Sempre double na árvore anotada
-        free(cleaned);
+        expr->type = type_double;
         break;
     }
 
@@ -993,14 +1014,17 @@ static void check_statement(struct node *stmt, method_table *mt)
         break;
     }
 
-    case Print: {
+    case Print:
+    {
         struct node *child = getchild(stmt, 0);
-        if (child->category != StrLit) {
+        if (child->category != StrLit)
+        {
             check_expression(child, mt);
             // Só aceita int, double e boolean. Tudo o resto (void, String[], undef) dá erro!
-            if (child->type != type_int && child->type != type_double && child->type != type_boolean) {
+            if (child->type != type_int && child->type != type_double && child->type != type_boolean)
+            {
                 printf("Line %d, col %d: Incompatible type %s in System.out.print statement\n",
-                    child->token_line, child->token_column, type_to_string(child->type));
+                       child->token_line, child->token_column, type_to_string(child->type));
                 sem_errors++;
             }
         }
