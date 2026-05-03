@@ -66,6 +66,8 @@ static int is_numeric(enum type t)
 
 static int is_compatible(enum type from, enum type to)
 {
+    if (from == type_undef || to == type_undef)
+        return 0;
     if (from == to)
         return 1;
     if (from == type_int && to == type_double)
@@ -387,7 +389,7 @@ static void build_global_table(struct node *program)
                 sem_errors++;
             }
 
-            if (find_method_by_sig(gtable->symbols, id_node->token, method_params))
+            else if (find_method_by_sig(gtable->symbols, id_node->token, method_params))
             {
                 char *sig = make_signature(id_node->token, method_params);
                 printf("Line %d, col %d: Symbol %s already defined\n",
@@ -779,17 +781,12 @@ static void check_expression(struct node *expr, method_table *mt)
         struct node *l = getchild(expr, 0);
         struct node *r = getchild(expr, 1);
 
-        int r_is_unknown_symbol = (r->type == type_undef && r->category == Identifier);
-
-        if (!r_is_unknown_symbol)
+        if (!is_compatible(r->type, l->type) || l->type == type_string_array)
         {
-            if (!is_compatible(r->type, l->type) || l->type == type_string_array)
-            {
-                printf("Line %d, col %d: Operator = cannot be applied to types %s, %s\n",
-                       expr->token_line, expr->token_column,
-                       type_to_string(l->type), type_to_string(r->type));
-                sem_errors++;
-            }
+            printf("Line %d, col %d: Operator = cannot be applied to types %s, %s\n",
+                   expr->token_line, expr->token_column,
+                   type_to_string(l->type), type_to_string(r->type));
+            sem_errors++;
         }
         expr->type = l->type;
         break;
@@ -828,6 +825,17 @@ static void check_expression(struct node *expr, method_table *mt)
     case Call:
     {
         struct node *id_node = getchild(expr, 0);
+
+        if (is_reserved_underscore(id_node->token))
+        {
+            printf("Line %d, col %d: Symbol _ is reserved\n",
+                   id_node->token_line, id_node->token_column);
+            sem_errors++;
+            expr->type = type_undef;
+            id_node->type = type_undef;
+            break;
+        }
+
         int num_args = countchildren(expr) - 1;
 
         enum type arg_types[128];
