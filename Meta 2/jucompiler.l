@@ -121,7 +121,6 @@ while                   { handle_token("WHILE", yyleng); return WHILE; }
             if (print)
                 printf("%s\n", string_buffer);
             yylval.val = strdup(string_content);
-            col_count = string_col;
         } BEGIN(INITIAL);
         if (!string_error) {
             strncpy(last_token_text, string_content, sizeof(last_token_text)-1);
