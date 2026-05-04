@@ -1,0 +1,4098 @@
+Terminals unused in grammar
+
+    ARROW
+    RESERVED
+
+
+Grammar
+
+    0 $accept: Program $end
+
+    1 Program: CLASS IDENTIFIER LBRACE MemberList RBRACE
+
+    2 MemberList: ε
+    3           | MemberList MethodDecl
+    4           | MemberList FieldDecl
+    5           | MemberList SEMICOLON
+
+    6 MethodDecl: PUBLIC STATIC MethodHeader MethodBody
+
+    7 FieldDecl: PUBLIC STATIC Type IDENTIFIER IdentifierList SEMICOLON
+    8          | error SEMICOLON
+
+    9 IdentifierList: ε
+   10               | IdentifierList COMMA IDENTIFIER
+
+   11 Type: BOOL
+   12     | INT
+   13     | DOUBLE
+
+   14 MethodHeader: Type IDENTIFIER LPAR RPAR
+   15             | Type IDENTIFIER LPAR FormalParams RPAR
+   16             | VOID IDENTIFIER LPAR RPAR
+   17             | VOID IDENTIFIER LPAR FormalParams RPAR
+
+   18 FormalParams: ParamList
+   19             | STRING LSQ RSQ IDENTIFIER
+
+   20 ParamList: Type IDENTIFIER
+   21          | ParamList COMMA Type IDENTIFIER
+
+   22 MethodBody: LBRACE StatementOrVarDecl RBRACE
+
+   23 StatementOrVarDecl: ε
+   24                   | StatementOrVarDecl Statement
+   25                   | StatementOrVarDecl VarDecl
+
+   26 VarDecl: Type IDENTIFIER IdentifierList SEMICOLON
+
+   27 Statement: LBRACE StatementList RBRACE
+   28          | IF LPAR Expr RPAR Statement
+   29          | IF LPAR Expr RPAR Statement ELSE Statement
+   30          | WHILE LPAR Expr RPAR Statement
+   31          | RETURN SEMICOLON
+   32          | RETURN Expr SEMICOLON
+   33          | SEMICOLON
+   34          | MethodInvocation SEMICOLON
+   35          | Assignment SEMICOLON
+   36          | ParseArgs SEMICOLON
+   37          | PRINT LPAR Expr RPAR SEMICOLON
+   38          | PRINT LPAR STRLIT RPAR SEMICOLON
+   39          | error SEMICOLON
+
+   40 StatementList: ε
+   41              | StatementList Statement
+
+   42 MethodInvocation: IDENTIFIER LPAR RPAR
+   43                 | IDENTIFIER LPAR ArgList RPAR
+   44                 | IDENTIFIER LPAR error RPAR
+
+   45 ArgList: Expr
+   46        | ArgList COMMA Expr
+
+   47 Assignment: IDENTIFIER ASSIGN Expr
+
+   48 ParseArgs: PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | PARSEINT LPAR error RPAR
+
+   50 Expr: Expr PLUS Expr
+   51     | Expr MINUS Expr
+   52     | Expr STAR Expr
+   53     | Expr DIV Expr
+   54     | Expr MOD Expr
+   55     | Expr AND Expr
+   56     | Expr OR Expr
+   57     | Expr XOR Expr
+   58     | Expr LSHIFT Expr
+   59     | Expr RSHIFT Expr
+   60     | Expr EQ Expr
+   61     | Expr GE Expr
+   62     | Expr GT Expr
+   63     | Expr LE Expr
+   64     | Expr LT Expr
+   65     | Expr NE Expr
+   66     | MINUS Expr
+   67     | PLUS Expr
+   68     | NOT Expr
+   69     | LPAR Expr RPAR
+   70     | LPAR error RPAR
+   71     | MethodInvocation
+   72     | Assignment
+   73     | ParseArgs
+   74     | IDENTIFIER
+   75     | IDENTIFIER DOTLENGTH
+   76     | NATURAL
+   77     | DECIMAL
+   78     | BOOLLIT
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256) 8 39 44 49 70
+    LPAR (258) 14 15 16 17 28 29 30 37 38 42 43 44 48 49 69 70
+    RPAR (259) 14 15 16 17 28 29 30 37 38 42 43 44 48 49 69 70
+    LBRACE (260) 1 22 27
+    RBRACE (261) 1 22 27
+    LSQ (262) 19 48
+    RSQ (263) 19 48
+    EQ (264) 60
+    ASSIGN (265) 47
+    GE (266) 61
+    GT (267) 62
+    LE (268) 63
+    LT (269) 64
+    NE (270) 65
+    NOT (271) 68
+    COMMA (272) 10 21 46
+    SEMICOLON (273) 5 7 8 26 31 32 33 34 35 36 37 38 39
+    STAR (274) 52
+    DIV (275) 53
+    PLUS (276) 50 67
+    MINUS (277) 51 66
+    MOD (278) 54
+    AND (279) 55
+    OR (280) 56
+    ARROW (281)
+    LSHIFT (282) 58
+    RSHIFT (283) 59
+    XOR (284) 57
+    INT (285) 12
+    DOUBLE (286) 13
+    STRING (287) 19
+    BOOL (288) 11
+    IF (289) 28 29
+    ELSE (290) 29
+    CLASS (291) 1
+    PUBLIC (292) 6 7
+    RETURN (293) 31 32
+    STATIC (294) 6 7
+    VOID (295) 16 17
+    WHILE (296) 30
+    RESERVED (297)
+    DOTLENGTH (298) 75
+    PRINT (299) 37 38
+    PARSEINT (300) 48 49
+    NATURAL <val> (301) 76
+    DECIMAL <val> (302) 77
+    IDENTIFIER <val> (303) 1 7 10 14 15 16 17 19 20 21 26 42 43 44 47 48 74 75
+    STRLIT <val> (304) 38
+    BOOLLIT <val> (305) 78
+    LOWER_THAN_ELSE (306)
+    UNARY (307)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (53)
+        on left: 0
+    Program <node> (54)
+        on left: 1
+        on right: 0
+    MemberList <list> (55)
+        on left: 2 3 4 5
+        on right: 1 3 4 5
+    MethodDecl <node> (56)
+        on left: 6
+        on right: 3
+    FieldDecl <list> (57)
+        on left: 7 8
+        on right: 4
+    IdentifierList <list> (58)
+        on left: 9 10
+        on right: 7 10 26
+    Type <node> (59)
+        on left: 11 12 13
+        on right: 7 14 15 20 21 26
+    MethodHeader <node> (60)
+        on left: 14 15 16 17
+        on right: 6
+    FormalParams <list> (61)
+        on left: 18 19
+        on right: 15 17
+    ParamList <list> (62)
+        on left: 20 21
+        on right: 18 21
+    MethodBody <node> (63)
+        on left: 22
+        on right: 6
+    StatementOrVarDecl <list> (64)
+        on left: 23 24 25
+        on right: 22 24 25
+    VarDecl <list> (65)
+        on left: 26
+        on right: 25
+    Statement <node> (66)
+        on left: 27 28 29 30 31 32 33 34 35 36 37 38 39
+        on right: 24 28 29 30 41
+    StatementList <list> (67)
+        on left: 40 41
+        on right: 27 41
+    MethodInvocation <node> (68)
+        on left: 42 43 44
+        on right: 34 71
+    ArgList <list> (69)
+        on left: 45 46
+        on right: 43 46
+    Assignment <node> (70)
+        on left: 47
+        on right: 35 72
+    ParseArgs <node> (71)
+        on left: 48 49
+        on right: 36 73
+    Expr <node> (72)
+        on left: 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78
+        on right: 28 29 30 32 37 45 46 47 48 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69
+
+
+State 0
+
+    0 $accept: • Program $end
+    1 Program: • CLASS IDENTIFIER LBRACE MemberList RBRACE
+
+    CLASS  shift, and go to state 1
+
+    Program  go to state 2
+
+
+State 1
+
+    1 Program: CLASS • IDENTIFIER LBRACE MemberList RBRACE
+
+    IDENTIFIER  shift, and go to state 3
+
+
+State 2
+
+    0 $accept: Program • $end
+
+    $end  shift, and go to state 4
+
+
+State 3
+
+    1 Program: CLASS IDENTIFIER • LBRACE MemberList RBRACE
+
+    LBRACE  shift, and go to state 5
+
+
+State 4
+
+    0 $accept: Program $end •
+
+    $default  accept
+
+
+State 5
+
+    1 Program: CLASS IDENTIFIER LBRACE • MemberList RBRACE
+    2 MemberList: ε •
+    3           | • MemberList MethodDecl
+    4           | • MemberList FieldDecl
+    5           | • MemberList SEMICOLON
+
+    $default  reduce using rule 2 (MemberList)
+
+    MemberList  go to state 6
+
+
+State 6
+
+    1 Program: CLASS IDENTIFIER LBRACE MemberList • RBRACE
+    3 MemberList: MemberList • MethodDecl
+    4           | MemberList • FieldDecl
+    5           | MemberList • SEMICOLON
+    6 MethodDecl: • PUBLIC STATIC MethodHeader MethodBody
+    7 FieldDecl: • PUBLIC STATIC Type IDENTIFIER IdentifierList SEMICOLON
+    8          | • error SEMICOLON
+
+    error      shift, and go to state 7
+    RBRACE     shift, and go to state 8
+    SEMICOLON  shift, and go to state 9
+    PUBLIC     shift, and go to state 10
+
+    MethodDecl  go to state 11
+    FieldDecl   go to state 12
+
+
+State 7
+
+    8 FieldDecl: error • SEMICOLON
+
+    SEMICOLON  shift, and go to state 13
+
+
+State 8
+
+    1 Program: CLASS IDENTIFIER LBRACE MemberList RBRACE •
+
+    $default  reduce using rule 1 (Program)
+
+
+State 9
+
+    5 MemberList: MemberList SEMICOLON •
+
+    $default  reduce using rule 5 (MemberList)
+
+
+State 10
+
+    6 MethodDecl: PUBLIC • STATIC MethodHeader MethodBody
+    7 FieldDecl: PUBLIC • STATIC Type IDENTIFIER IdentifierList SEMICOLON
+
+    STATIC  shift, and go to state 14
+
+
+State 11
+
+    3 MemberList: MemberList MethodDecl •
+
+    $default  reduce using rule 3 (MemberList)
+
+
+State 12
+
+    4 MemberList: MemberList FieldDecl •
+
+    $default  reduce using rule 4 (MemberList)
+
+
+State 13
+
+    8 FieldDecl: error SEMICOLON •
+
+    $default  reduce using rule 8 (FieldDecl)
+
+
+State 14
+
+    6 MethodDecl: PUBLIC STATIC • MethodHeader MethodBody
+    7 FieldDecl: PUBLIC STATIC • Type IDENTIFIER IdentifierList SEMICOLON
+   11 Type: • BOOL
+   12     | • INT
+   13     | • DOUBLE
+   14 MethodHeader: • Type IDENTIFIER LPAR RPAR
+   15             | • Type IDENTIFIER LPAR FormalParams RPAR
+   16             | • VOID IDENTIFIER LPAR RPAR
+   17             | • VOID IDENTIFIER LPAR FormalParams RPAR
+
+    INT     shift, and go to state 15
+    DOUBLE  shift, and go to state 16
+    BOOL    shift, and go to state 17
+    VOID    shift, and go to state 18
+
+    Type          go to state 19
+    MethodHeader  go to state 20
+
+
+State 15
+
+   12 Type: INT •
+
+    $default  reduce using rule 12 (Type)
+
+
+State 16
+
+   13 Type: DOUBLE •
+
+    $default  reduce using rule 13 (Type)
+
+
+State 17
+
+   11 Type: BOOL •
+
+    $default  reduce using rule 11 (Type)
+
+
+State 18
+
+   16 MethodHeader: VOID • IDENTIFIER LPAR RPAR
+   17             | VOID • IDENTIFIER LPAR FormalParams RPAR
+
+    IDENTIFIER  shift, and go to state 21
+
+
+State 19
+
+    7 FieldDecl: PUBLIC STATIC Type • IDENTIFIER IdentifierList SEMICOLON
+   14 MethodHeader: Type • IDENTIFIER LPAR RPAR
+   15             | Type • IDENTIFIER LPAR FormalParams RPAR
+
+    IDENTIFIER  shift, and go to state 22
+
+
+State 20
+
+    6 MethodDecl: PUBLIC STATIC MethodHeader • MethodBody
+   22 MethodBody: • LBRACE StatementOrVarDecl RBRACE
+
+    LBRACE  shift, and go to state 23
+
+    MethodBody  go to state 24
+
+
+State 21
+
+   16 MethodHeader: VOID IDENTIFIER • LPAR RPAR
+   17             | VOID IDENTIFIER • LPAR FormalParams RPAR
+
+    LPAR  shift, and go to state 25
+
+
+State 22
+
+    7 FieldDecl: PUBLIC STATIC Type IDENTIFIER • IdentifierList SEMICOLON
+    9 IdentifierList: ε •  [COMMA, SEMICOLON]
+   10               | • IdentifierList COMMA IDENTIFIER
+   14 MethodHeader: Type IDENTIFIER • LPAR RPAR
+   15             | Type IDENTIFIER • LPAR FormalParams RPAR
+
+    LPAR  shift, and go to state 26
+
+    $default  reduce using rule 9 (IdentifierList)
+
+    IdentifierList  go to state 27
+
+
+State 23
+
+   22 MethodBody: LBRACE • StatementOrVarDecl RBRACE
+   23 StatementOrVarDecl: ε •
+   24                   | • StatementOrVarDecl Statement
+   25                   | • StatementOrVarDecl VarDecl
+
+    $default  reduce using rule 23 (StatementOrVarDecl)
+
+    StatementOrVarDecl  go to state 28
+
+
+State 24
+
+    6 MethodDecl: PUBLIC STATIC MethodHeader MethodBody •
+
+    $default  reduce using rule 6 (MethodDecl)
+
+
+State 25
+
+   11 Type: • BOOL
+   12     | • INT
+   13     | • DOUBLE
+   16 MethodHeader: VOID IDENTIFIER LPAR • RPAR
+   17             | VOID IDENTIFIER LPAR • FormalParams RPAR
+   18 FormalParams: • ParamList
+   19             | • STRING LSQ RSQ IDENTIFIER
+   20 ParamList: • Type IDENTIFIER
+   21          | • ParamList COMMA Type IDENTIFIER
+
+    RPAR    shift, and go to state 29
+    INT     shift, and go to state 15
+    DOUBLE  shift, and go to state 16
+    STRING  shift, and go to state 30
+    BOOL    shift, and go to state 17
+
+    Type          go to state 31
+    FormalParams  go to state 32
+    ParamList     go to state 33
+
+
+State 26
+
+   11 Type: • BOOL
+   12     | • INT
+   13     | • DOUBLE
+   14 MethodHeader: Type IDENTIFIER LPAR • RPAR
+   15             | Type IDENTIFIER LPAR • FormalParams RPAR
+   18 FormalParams: • ParamList
+   19             | • STRING LSQ RSQ IDENTIFIER
+   20 ParamList: • Type IDENTIFIER
+   21          | • ParamList COMMA Type IDENTIFIER
+
+    RPAR    shift, and go to state 34
+    INT     shift, and go to state 15
+    DOUBLE  shift, and go to state 16
+    STRING  shift, and go to state 30
+    BOOL    shift, and go to state 17
+
+    Type          go to state 31
+    FormalParams  go to state 35
+    ParamList     go to state 33
+
+
+State 27
+
+    7 FieldDecl: PUBLIC STATIC Type IDENTIFIER IdentifierList • SEMICOLON
+   10 IdentifierList: IdentifierList • COMMA IDENTIFIER
+
+    COMMA      shift, and go to state 36
+    SEMICOLON  shift, and go to state 37
+
+
+State 28
+
+   11 Type: • BOOL
+   12     | • INT
+   13     | • DOUBLE
+   22 MethodBody: LBRACE StatementOrVarDecl • RBRACE
+   24 StatementOrVarDecl: StatementOrVarDecl • Statement
+   25                   | StatementOrVarDecl • VarDecl
+   26 VarDecl: • Type IDENTIFIER IdentifierList SEMICOLON
+   27 Statement: • LBRACE StatementList RBRACE
+   28          | • IF LPAR Expr RPAR Statement
+   29          | • IF LPAR Expr RPAR Statement ELSE Statement
+   30          | • WHILE LPAR Expr RPAR Statement
+   31          | • RETURN SEMICOLON
+   32          | • RETURN Expr SEMICOLON
+   33          | • SEMICOLON
+   34          | • MethodInvocation SEMICOLON
+   35          | • Assignment SEMICOLON
+   36          | • ParseArgs SEMICOLON
+   37          | • PRINT LPAR Expr RPAR SEMICOLON
+   38          | • PRINT LPAR STRLIT RPAR SEMICOLON
+   39          | • error SEMICOLON
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+
+    error       shift, and go to state 38
+    LBRACE      shift, and go to state 39
+    RBRACE      shift, and go to state 40
+    SEMICOLON   shift, and go to state 41
+    INT         shift, and go to state 15
+    DOUBLE      shift, and go to state 16
+    BOOL        shift, and go to state 17
+    IF          shift, and go to state 42
+    RETURN      shift, and go to state 43
+    WHILE       shift, and go to state 44
+    PRINT       shift, and go to state 45
+    PARSEINT    shift, and go to state 46
+    IDENTIFIER  shift, and go to state 47
+
+    Type              go to state 48
+    VarDecl           go to state 49
+    Statement         go to state 50
+    MethodInvocation  go to state 51
+    Assignment        go to state 52
+    ParseArgs         go to state 53
+
+
+State 29
+
+   16 MethodHeader: VOID IDENTIFIER LPAR RPAR •
+
+    $default  reduce using rule 16 (MethodHeader)
+
+
+State 30
+
+   19 FormalParams: STRING • LSQ RSQ IDENTIFIER
+
+    LSQ  shift, and go to state 54
+
+
+State 31
+
+   20 ParamList: Type • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 55
+
+
+State 32
+
+   17 MethodHeader: VOID IDENTIFIER LPAR FormalParams • RPAR
+
+    RPAR  shift, and go to state 56
+
+
+State 33
+
+   18 FormalParams: ParamList •  [RPAR]
+   21 ParamList: ParamList • COMMA Type IDENTIFIER
+
+    COMMA  shift, and go to state 57
+
+    $default  reduce using rule 18 (FormalParams)
+
+
+State 34
+
+   14 MethodHeader: Type IDENTIFIER LPAR RPAR •
+
+    $default  reduce using rule 14 (MethodHeader)
+
+
+State 35
+
+   15 MethodHeader: Type IDENTIFIER LPAR FormalParams • RPAR
+
+    RPAR  shift, and go to state 58
+
+
+State 36
+
+   10 IdentifierList: IdentifierList COMMA • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 59
+
+
+State 37
+
+    7 FieldDecl: PUBLIC STATIC Type IDENTIFIER IdentifierList SEMICOLON •
+
+    $default  reduce using rule 7 (FieldDecl)
+
+
+State 38
+
+   39 Statement: error • SEMICOLON
+
+    SEMICOLON  shift, and go to state 60
+
+
+State 39
+
+   27 Statement: LBRACE • StatementList RBRACE
+   40 StatementList: ε •
+   41              | • StatementList Statement
+
+    $default  reduce using rule 40 (StatementList)
+
+    StatementList  go to state 61
+
+
+State 40
+
+   22 MethodBody: LBRACE StatementOrVarDecl RBRACE •
+
+    $default  reduce using rule 22 (MethodBody)
+
+
+State 41
+
+   33 Statement: SEMICOLON •
+
+    $default  reduce using rule 33 (Statement)
+
+
+State 42
+
+   28 Statement: IF • LPAR Expr RPAR Statement
+   29          | IF • LPAR Expr RPAR Statement ELSE Statement
+
+    LPAR  shift, and go to state 62
+
+
+State 43
+
+   31 Statement: RETURN • SEMICOLON
+   32          | RETURN • Expr SEMICOLON
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    SEMICOLON   shift, and go to state 65
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 75
+
+
+State 44
+
+   30 Statement: WHILE • LPAR Expr RPAR Statement
+
+    LPAR  shift, and go to state 76
+
+
+State 45
+
+   37 Statement: PRINT • LPAR Expr RPAR SEMICOLON
+   38          | PRINT • LPAR STRLIT RPAR SEMICOLON
+
+    LPAR  shift, and go to state 77
+
+
+State 46
+
+   48 ParseArgs: PARSEINT • LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | PARSEINT • LPAR error RPAR
+
+    LPAR  shift, and go to state 78
+
+
+State 47
+
+   42 MethodInvocation: IDENTIFIER • LPAR RPAR
+   43                 | IDENTIFIER • LPAR ArgList RPAR
+   44                 | IDENTIFIER • LPAR error RPAR
+   47 Assignment: IDENTIFIER • ASSIGN Expr
+
+    LPAR    shift, and go to state 79
+    ASSIGN  shift, and go to state 80
+
+
+State 48
+
+   26 VarDecl: Type • IDENTIFIER IdentifierList SEMICOLON
+
+    IDENTIFIER  shift, and go to state 81
+
+
+State 49
+
+   25 StatementOrVarDecl: StatementOrVarDecl VarDecl •
+
+    $default  reduce using rule 25 (StatementOrVarDecl)
+
+
+State 50
+
+   24 StatementOrVarDecl: StatementOrVarDecl Statement •
+
+    $default  reduce using rule 24 (StatementOrVarDecl)
+
+
+State 51
+
+   34 Statement: MethodInvocation • SEMICOLON
+
+    SEMICOLON  shift, and go to state 82
+
+
+State 52
+
+   35 Statement: Assignment • SEMICOLON
+
+    SEMICOLON  shift, and go to state 83
+
+
+State 53
+
+   36 Statement: ParseArgs • SEMICOLON
+
+    SEMICOLON  shift, and go to state 84
+
+
+State 54
+
+   19 FormalParams: STRING LSQ • RSQ IDENTIFIER
+
+    RSQ  shift, and go to state 85
+
+
+State 55
+
+   20 ParamList: Type IDENTIFIER •
+
+    $default  reduce using rule 20 (ParamList)
+
+
+State 56
+
+   17 MethodHeader: VOID IDENTIFIER LPAR FormalParams RPAR •
+
+    $default  reduce using rule 17 (MethodHeader)
+
+
+State 57
+
+   11 Type: • BOOL
+   12     | • INT
+   13     | • DOUBLE
+   21 ParamList: ParamList COMMA • Type IDENTIFIER
+
+    INT     shift, and go to state 15
+    DOUBLE  shift, and go to state 16
+    BOOL    shift, and go to state 17
+
+    Type  go to state 86
+
+
+State 58
+
+   15 MethodHeader: Type IDENTIFIER LPAR FormalParams RPAR •
+
+    $default  reduce using rule 15 (MethodHeader)
+
+
+State 59
+
+   10 IdentifierList: IdentifierList COMMA IDENTIFIER •
+
+    $default  reduce using rule 10 (IdentifierList)
+
+
+State 60
+
+   39 Statement: error SEMICOLON •
+
+    $default  reduce using rule 39 (Statement)
+
+
+State 61
+
+   27 Statement: • LBRACE StatementList RBRACE
+   27          | LBRACE StatementList • RBRACE
+   28          | • IF LPAR Expr RPAR Statement
+   29          | • IF LPAR Expr RPAR Statement ELSE Statement
+   30          | • WHILE LPAR Expr RPAR Statement
+   31          | • RETURN SEMICOLON
+   32          | • RETURN Expr SEMICOLON
+   33          | • SEMICOLON
+   34          | • MethodInvocation SEMICOLON
+   35          | • Assignment SEMICOLON
+   36          | • ParseArgs SEMICOLON
+   37          | • PRINT LPAR Expr RPAR SEMICOLON
+   38          | • PRINT LPAR STRLIT RPAR SEMICOLON
+   39          | • error SEMICOLON
+   41 StatementList: StatementList • Statement
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+
+    error       shift, and go to state 38
+    LBRACE      shift, and go to state 39
+    RBRACE      shift, and go to state 87
+    SEMICOLON   shift, and go to state 41
+    IF          shift, and go to state 42
+    RETURN      shift, and go to state 43
+    WHILE       shift, and go to state 44
+    PRINT       shift, and go to state 45
+    PARSEINT    shift, and go to state 46
+    IDENTIFIER  shift, and go to state 47
+
+    Statement         go to state 88
+    MethodInvocation  go to state 51
+    Assignment        go to state 52
+    ParseArgs         go to state 53
+
+
+State 62
+
+   28 Statement: IF LPAR • Expr RPAR Statement
+   29          | IF LPAR • Expr RPAR Statement ELSE Statement
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 89
+
+
+State 63
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   69     | LPAR • Expr RPAR
+   70     | • LPAR error RPAR
+   70     | LPAR • error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    error       shift, and go to state 90
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 91
+
+
+State 64
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   68     | NOT • Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 92
+
+
+State 65
+
+   31 Statement: RETURN SEMICOLON •
+
+    $default  reduce using rule 31 (Statement)
+
+
+State 66
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   67     | PLUS • Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 93
+
+
+State 67
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   66     | MINUS • Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 94
+
+
+State 68
+
+   76 Expr: NATURAL •
+
+    $default  reduce using rule 76 (Expr)
+
+
+State 69
+
+   77 Expr: DECIMAL •
+
+    $default  reduce using rule 77 (Expr)
+
+
+State 70
+
+   42 MethodInvocation: IDENTIFIER • LPAR RPAR
+   43                 | IDENTIFIER • LPAR ArgList RPAR
+   44                 | IDENTIFIER • LPAR error RPAR
+   47 Assignment: IDENTIFIER • ASSIGN Expr
+   74 Expr: IDENTIFIER •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, STAR, DIV, PLUS, MINUS, MOD, AND, OR, LSHIFT, RSHIFT, XOR]
+   75     | IDENTIFIER • DOTLENGTH
+
+    LPAR       shift, and go to state 79
+    ASSIGN     shift, and go to state 80
+    DOTLENGTH  shift, and go to state 95
+
+    $default  reduce using rule 74 (Expr)
+
+
+State 71
+
+   78 Expr: BOOLLIT •
+
+    $default  reduce using rule 78 (Expr)
+
+
+State 72
+
+   71 Expr: MethodInvocation •
+
+    $default  reduce using rule 71 (Expr)
+
+
+State 73
+
+   72 Expr: Assignment •
+
+    $default  reduce using rule 72 (Expr)
+
+
+State 74
+
+   73 Expr: ParseArgs •
+
+    $default  reduce using rule 73 (Expr)
+
+
+State 75
+
+   32 Statement: RETURN Expr • SEMICOLON
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    EQ         shift, and go to state 96
+    GE         shift, and go to state 97
+    GT         shift, and go to state 98
+    LE         shift, and go to state 99
+    LT         shift, and go to state 100
+    NE         shift, and go to state 101
+    SEMICOLON  shift, and go to state 102
+    STAR       shift, and go to state 103
+    DIV        shift, and go to state 104
+    PLUS       shift, and go to state 105
+    MINUS      shift, and go to state 106
+    MOD        shift, and go to state 107
+    AND        shift, and go to state 108
+    OR         shift, and go to state 109
+    LSHIFT     shift, and go to state 110
+    RSHIFT     shift, and go to state 111
+    XOR        shift, and go to state 112
+
+
+State 76
+
+   30 Statement: WHILE LPAR • Expr RPAR Statement
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 113
+
+
+State 77
+
+   37 Statement: PRINT LPAR • Expr RPAR SEMICOLON
+   38          | PRINT LPAR • STRLIT RPAR SEMICOLON
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    STRLIT      shift, and go to state 114
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 115
+
+
+State 78
+
+   48 ParseArgs: PARSEINT LPAR • IDENTIFIER LSQ Expr RSQ RPAR
+   49          | PARSEINT LPAR • error RPAR
+
+    error       shift, and go to state 116
+    IDENTIFIER  shift, and go to state 117
+
+
+State 79
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   42                 | IDENTIFIER LPAR • RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   43                 | IDENTIFIER LPAR • ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   44                 | IDENTIFIER LPAR • error RPAR
+   45 ArgList: • Expr
+   46        | • ArgList COMMA Expr
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    error       shift, and go to state 118
+    LPAR        shift, and go to state 63
+    RPAR        shift, and go to state 119
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    ArgList           go to state 120
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 121
+
+
+State 80
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   47           | IDENTIFIER ASSIGN • Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 122
+
+
+State 81
+
+    9 IdentifierList: ε •
+   10               | • IdentifierList COMMA IDENTIFIER
+   26 VarDecl: Type IDENTIFIER • IdentifierList SEMICOLON
+
+    $default  reduce using rule 9 (IdentifierList)
+
+    IdentifierList  go to state 123
+
+
+State 82
+
+   34 Statement: MethodInvocation SEMICOLON •
+
+    $default  reduce using rule 34 (Statement)
+
+
+State 83
+
+   35 Statement: Assignment SEMICOLON •
+
+    $default  reduce using rule 35 (Statement)
+
+
+State 84
+
+   36 Statement: ParseArgs SEMICOLON •
+
+    $default  reduce using rule 36 (Statement)
+
+
+State 85
+
+   19 FormalParams: STRING LSQ RSQ • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 124
+
+
+State 86
+
+   21 ParamList: ParamList COMMA Type • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 125
+
+
+State 87
+
+   27 Statement: LBRACE StatementList RBRACE •
+
+    $default  reduce using rule 27 (Statement)
+
+
+State 88
+
+   41 StatementList: StatementList Statement •
+
+    $default  reduce using rule 41 (StatementList)
+
+
+State 89
+
+   28 Statement: IF LPAR Expr • RPAR Statement
+   29          | IF LPAR Expr • RPAR Statement ELSE Statement
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    RPAR    shift, and go to state 126
+    EQ      shift, and go to state 96
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    NE      shift, and go to state 101
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    AND     shift, and go to state 108
+    OR      shift, and go to state 109
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+    XOR     shift, and go to state 112
+
+
+State 90
+
+   70 Expr: LPAR error • RPAR
+
+    RPAR  shift, and go to state 127
+
+
+State 91
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+   69     | LPAR Expr • RPAR
+
+    RPAR    shift, and go to state 128
+    EQ      shift, and go to state 96
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    NE      shift, and go to state 101
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    AND     shift, and go to state 108
+    OR      shift, and go to state 109
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+    XOR     shift, and go to state 112
+
+
+State 92
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+   68     | NOT Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, STAR, DIV, PLUS, MINUS, MOD, AND, OR, LSHIFT, RSHIFT, XOR]
+
+    $default  reduce using rule 68 (Expr)
+
+    Conflict between rule 68 and token EQ resolved as reduce (EQ < UNARY).
+    Conflict between rule 68 and token GE resolved as reduce (GE < UNARY).
+    Conflict between rule 68 and token GT resolved as reduce (GT < UNARY).
+    Conflict between rule 68 and token LE resolved as reduce (LE < UNARY).
+    Conflict between rule 68 and token LT resolved as reduce (LT < UNARY).
+    Conflict between rule 68 and token NE resolved as reduce (NE < UNARY).
+    Conflict between rule 68 and token STAR resolved as reduce (STAR < UNARY).
+    Conflict between rule 68 and token DIV resolved as reduce (DIV < UNARY).
+    Conflict between rule 68 and token PLUS resolved as reduce (PLUS < UNARY).
+    Conflict between rule 68 and token MINUS resolved as reduce (MINUS < UNARY).
+    Conflict between rule 68 and token MOD resolved as reduce (MOD < UNARY).
+    Conflict between rule 68 and token AND resolved as reduce (AND < UNARY).
+    Conflict between rule 68 and token OR resolved as reduce (OR < UNARY).
+    Conflict between rule 68 and token LSHIFT resolved as reduce (LSHIFT < UNARY).
+    Conflict between rule 68 and token RSHIFT resolved as reduce (RSHIFT < UNARY).
+    Conflict between rule 68 and token XOR resolved as reduce (XOR < UNARY).
+
+
+State 93
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+   67     | PLUS Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, STAR, DIV, PLUS, MINUS, MOD, AND, OR, LSHIFT, RSHIFT, XOR]
+
+    $default  reduce using rule 67 (Expr)
+
+    Conflict between rule 67 and token EQ resolved as reduce (EQ < UNARY).
+    Conflict between rule 67 and token GE resolved as reduce (GE < UNARY).
+    Conflict between rule 67 and token GT resolved as reduce (GT < UNARY).
+    Conflict between rule 67 and token LE resolved as reduce (LE < UNARY).
+    Conflict between rule 67 and token LT resolved as reduce (LT < UNARY).
+    Conflict between rule 67 and token NE resolved as reduce (NE < UNARY).
+    Conflict between rule 67 and token STAR resolved as reduce (STAR < UNARY).
+    Conflict between rule 67 and token DIV resolved as reduce (DIV < UNARY).
+    Conflict between rule 67 and token PLUS resolved as reduce (PLUS < UNARY).
+    Conflict between rule 67 and token MINUS resolved as reduce (MINUS < UNARY).
+    Conflict between rule 67 and token MOD resolved as reduce (MOD < UNARY).
+    Conflict between rule 67 and token AND resolved as reduce (AND < UNARY).
+    Conflict between rule 67 and token OR resolved as reduce (OR < UNARY).
+    Conflict between rule 67 and token LSHIFT resolved as reduce (LSHIFT < UNARY).
+    Conflict between rule 67 and token RSHIFT resolved as reduce (RSHIFT < UNARY).
+    Conflict between rule 67 and token XOR resolved as reduce (XOR < UNARY).
+
+
+State 94
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+   66     | MINUS Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, STAR, DIV, PLUS, MINUS, MOD, AND, OR, LSHIFT, RSHIFT, XOR]
+
+    $default  reduce using rule 66 (Expr)
+
+    Conflict between rule 66 and token EQ resolved as reduce (EQ < UNARY).
+    Conflict between rule 66 and token GE resolved as reduce (GE < UNARY).
+    Conflict between rule 66 and token GT resolved as reduce (GT < UNARY).
+    Conflict between rule 66 and token LE resolved as reduce (LE < UNARY).
+    Conflict between rule 66 and token LT resolved as reduce (LT < UNARY).
+    Conflict between rule 66 and token NE resolved as reduce (NE < UNARY).
+    Conflict between rule 66 and token STAR resolved as reduce (STAR < UNARY).
+    Conflict between rule 66 and token DIV resolved as reduce (DIV < UNARY).
+    Conflict between rule 66 and token PLUS resolved as reduce (PLUS < UNARY).
+    Conflict between rule 66 and token MINUS resolved as reduce (MINUS < UNARY).
+    Conflict between rule 66 and token MOD resolved as reduce (MOD < UNARY).
+    Conflict between rule 66 and token AND resolved as reduce (AND < UNARY).
+    Conflict between rule 66 and token OR resolved as reduce (OR < UNARY).
+    Conflict between rule 66 and token LSHIFT resolved as reduce (LSHIFT < UNARY).
+    Conflict between rule 66 and token RSHIFT resolved as reduce (RSHIFT < UNARY).
+    Conflict between rule 66 and token XOR resolved as reduce (XOR < UNARY).
+
+
+State 95
+
+   75 Expr: IDENTIFIER DOTLENGTH •
+
+    $default  reduce using rule 75 (Expr)
+
+
+State 96
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   60     | Expr EQ • Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 129
+
+
+State 97
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   61     | Expr GE • Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 130
+
+
+State 98
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   62     | Expr GT • Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 131
+
+
+State 99
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   63     | Expr LE • Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 132
+
+
+State 100
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   64     | Expr LT • Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 133
+
+
+State 101
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   65     | Expr NE • Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 134
+
+
+State 102
+
+   32 Statement: RETURN Expr SEMICOLON •
+
+    $default  reduce using rule 32 (Statement)
+
+
+State 103
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   52     | Expr STAR • Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 135
+
+
+State 104
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   53     | Expr DIV • Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 136
+
+
+State 105
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   50     | Expr PLUS • Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 137
+
+
+State 106
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   51     | Expr MINUS • Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 138
+
+
+State 107
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   54     | Expr MOD • Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 139
+
+
+State 108
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   55     | Expr AND • Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 140
+
+
+State 109
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   56     | Expr OR • Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 141
+
+
+State 110
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   58     | Expr LSHIFT • Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 142
+
+
+State 111
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   59     | Expr RSHIFT • Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 143
+
+
+State 112
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   57     | Expr XOR • Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 144
+
+
+State 113
+
+   30 Statement: WHILE LPAR Expr • RPAR Statement
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    RPAR    shift, and go to state 145
+    EQ      shift, and go to state 96
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    NE      shift, and go to state 101
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    AND     shift, and go to state 108
+    OR      shift, and go to state 109
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+    XOR     shift, and go to state 112
+
+
+State 114
+
+   38 Statement: PRINT LPAR STRLIT • RPAR SEMICOLON
+
+    RPAR  shift, and go to state 146
+
+
+State 115
+
+   37 Statement: PRINT LPAR Expr • RPAR SEMICOLON
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    RPAR    shift, and go to state 147
+    EQ      shift, and go to state 96
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    NE      shift, and go to state 101
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    AND     shift, and go to state 108
+    OR      shift, and go to state 109
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+    XOR     shift, and go to state 112
+
+
+State 116
+
+   49 ParseArgs: PARSEINT LPAR error • RPAR
+
+    RPAR  shift, and go to state 148
+
+
+State 117
+
+   48 ParseArgs: PARSEINT LPAR IDENTIFIER • LSQ Expr RSQ RPAR
+
+    LSQ  shift, and go to state 149
+
+
+State 118
+
+   44 MethodInvocation: IDENTIFIER LPAR error • RPAR
+
+    RPAR  shift, and go to state 150
+
+
+State 119
+
+   42 MethodInvocation: IDENTIFIER LPAR RPAR •
+
+    $default  reduce using rule 42 (MethodInvocation)
+
+
+State 120
+
+   43 MethodInvocation: IDENTIFIER LPAR ArgList • RPAR
+   46 ArgList: ArgList • COMMA Expr
+
+    RPAR   shift, and go to state 151
+    COMMA  shift, and go to state 152
+
+
+State 121
+
+   45 ArgList: Expr •  [RPAR, COMMA]
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    EQ      shift, and go to state 96
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    NE      shift, and go to state 101
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    AND     shift, and go to state 108
+    OR      shift, and go to state 109
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+    XOR     shift, and go to state 112
+
+    $default  reduce using rule 45 (ArgList)
+
+
+State 122
+
+   47 Assignment: IDENTIFIER ASSIGN Expr •  [RPAR, RSQ, COMMA, SEMICOLON]
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    EQ      shift, and go to state 96
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    NE      shift, and go to state 101
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    AND     shift, and go to state 108
+    OR      shift, and go to state 109
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+    XOR     shift, and go to state 112
+
+    $default  reduce using rule 47 (Assignment)
+
+    Conflict between rule 47 and token EQ resolved as shift (ASSIGN < EQ).
+    Conflict between rule 47 and token GE resolved as shift (ASSIGN < GE).
+    Conflict between rule 47 and token GT resolved as shift (ASSIGN < GT).
+    Conflict between rule 47 and token LE resolved as shift (ASSIGN < LE).
+    Conflict between rule 47 and token LT resolved as shift (ASSIGN < LT).
+    Conflict between rule 47 and token NE resolved as shift (ASSIGN < NE).
+    Conflict between rule 47 and token STAR resolved as shift (ASSIGN < STAR).
+    Conflict between rule 47 and token DIV resolved as shift (ASSIGN < DIV).
+    Conflict between rule 47 and token PLUS resolved as shift (ASSIGN < PLUS).
+    Conflict between rule 47 and token MINUS resolved as shift (ASSIGN < MINUS).
+    Conflict between rule 47 and token MOD resolved as shift (ASSIGN < MOD).
+    Conflict between rule 47 and token AND resolved as shift (ASSIGN < AND).
+    Conflict between rule 47 and token OR resolved as shift (ASSIGN < OR).
+    Conflict between rule 47 and token LSHIFT resolved as shift (ASSIGN < LSHIFT).
+    Conflict between rule 47 and token RSHIFT resolved as shift (ASSIGN < RSHIFT).
+    Conflict between rule 47 and token XOR resolved as shift (ASSIGN < XOR).
+
+
+State 123
+
+   10 IdentifierList: IdentifierList • COMMA IDENTIFIER
+   26 VarDecl: Type IDENTIFIER IdentifierList • SEMICOLON
+
+    COMMA      shift, and go to state 36
+    SEMICOLON  shift, and go to state 153
+
+
+State 124
+
+   19 FormalParams: STRING LSQ RSQ IDENTIFIER •
+
+    $default  reduce using rule 19 (FormalParams)
+
+
+State 125
+
+   21 ParamList: ParamList COMMA Type IDENTIFIER •
+
+    $default  reduce using rule 21 (ParamList)
+
+
+State 126
+
+   27 Statement: • LBRACE StatementList RBRACE
+   28          | • IF LPAR Expr RPAR Statement
+   28          | IF LPAR Expr RPAR • Statement
+   29          | • IF LPAR Expr RPAR Statement ELSE Statement
+   29          | IF LPAR Expr RPAR • Statement ELSE Statement
+   30          | • WHILE LPAR Expr RPAR Statement
+   31          | • RETURN SEMICOLON
+   32          | • RETURN Expr SEMICOLON
+   33          | • SEMICOLON
+   34          | • MethodInvocation SEMICOLON
+   35          | • Assignment SEMICOLON
+   36          | • ParseArgs SEMICOLON
+   37          | • PRINT LPAR Expr RPAR SEMICOLON
+   38          | • PRINT LPAR STRLIT RPAR SEMICOLON
+   39          | • error SEMICOLON
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+
+    error       shift, and go to state 38
+    LBRACE      shift, and go to state 39
+    SEMICOLON   shift, and go to state 41
+    IF          shift, and go to state 42
+    RETURN      shift, and go to state 43
+    WHILE       shift, and go to state 44
+    PRINT       shift, and go to state 45
+    PARSEINT    shift, and go to state 46
+    IDENTIFIER  shift, and go to state 47
+
+    Statement         go to state 154
+    MethodInvocation  go to state 51
+    Assignment        go to state 52
+    ParseArgs         go to state 53
+
+
+State 127
+
+   70 Expr: LPAR error RPAR •
+
+    $default  reduce using rule 70 (Expr)
+
+
+State 128
+
+   69 Expr: LPAR Expr RPAR •
+
+    $default  reduce using rule 69 (Expr)
+
+
+State 129
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   60     | Expr EQ Expr •  [RPAR, RSQ, EQ, NE, COMMA, SEMICOLON, AND, OR, XOR]
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+
+    $default  reduce using rule 60 (Expr)
+
+    Conflict between rule 60 and token EQ resolved as reduce (%left EQ).
+    Conflict between rule 60 and token GE resolved as shift (EQ < GE).
+    Conflict between rule 60 and token GT resolved as shift (EQ < GT).
+    Conflict between rule 60 and token LE resolved as shift (EQ < LE).
+    Conflict between rule 60 and token LT resolved as shift (EQ < LT).
+    Conflict between rule 60 and token NE resolved as reduce (%left NE).
+    Conflict between rule 60 and token STAR resolved as shift (EQ < STAR).
+    Conflict between rule 60 and token DIV resolved as shift (EQ < DIV).
+    Conflict between rule 60 and token PLUS resolved as shift (EQ < PLUS).
+    Conflict between rule 60 and token MINUS resolved as shift (EQ < MINUS).
+    Conflict between rule 60 and token MOD resolved as shift (EQ < MOD).
+    Conflict between rule 60 and token AND resolved as reduce (AND < EQ).
+    Conflict between rule 60 and token OR resolved as reduce (OR < EQ).
+    Conflict between rule 60 and token LSHIFT resolved as shift (EQ < LSHIFT).
+    Conflict between rule 60 and token RSHIFT resolved as shift (EQ < RSHIFT).
+    Conflict between rule 60 and token XOR resolved as reduce (XOR < EQ).
+
+
+State 130
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   61     | Expr GE Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, AND, OR, XOR]
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+
+    $default  reduce using rule 61 (Expr)
+
+    Conflict between rule 61 and token EQ resolved as reduce (EQ < GE).
+    Conflict between rule 61 and token GE resolved as reduce (%left GE).
+    Conflict between rule 61 and token GT resolved as reduce (%left GT).
+    Conflict between rule 61 and token LE resolved as reduce (%left LE).
+    Conflict between rule 61 and token LT resolved as reduce (%left LT).
+    Conflict between rule 61 and token NE resolved as reduce (NE < GE).
+    Conflict between rule 61 and token STAR resolved as shift (GE < STAR).
+    Conflict between rule 61 and token DIV resolved as shift (GE < DIV).
+    Conflict between rule 61 and token PLUS resolved as shift (GE < PLUS).
+    Conflict between rule 61 and token MINUS resolved as shift (GE < MINUS).
+    Conflict between rule 61 and token MOD resolved as shift (GE < MOD).
+    Conflict between rule 61 and token AND resolved as reduce (AND < GE).
+    Conflict between rule 61 and token OR resolved as reduce (OR < GE).
+    Conflict between rule 61 and token LSHIFT resolved as shift (GE < LSHIFT).
+    Conflict between rule 61 and token RSHIFT resolved as shift (GE < RSHIFT).
+    Conflict between rule 61 and token XOR resolved as reduce (XOR < GE).
+
+
+State 131
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   62     | Expr GT Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, AND, OR, XOR]
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+
+    $default  reduce using rule 62 (Expr)
+
+    Conflict between rule 62 and token EQ resolved as reduce (EQ < GT).
+    Conflict between rule 62 and token GE resolved as reduce (%left GE).
+    Conflict between rule 62 and token GT resolved as reduce (%left GT).
+    Conflict between rule 62 and token LE resolved as reduce (%left LE).
+    Conflict between rule 62 and token LT resolved as reduce (%left LT).
+    Conflict between rule 62 and token NE resolved as reduce (NE < GT).
+    Conflict between rule 62 and token STAR resolved as shift (GT < STAR).
+    Conflict between rule 62 and token DIV resolved as shift (GT < DIV).
+    Conflict between rule 62 and token PLUS resolved as shift (GT < PLUS).
+    Conflict between rule 62 and token MINUS resolved as shift (GT < MINUS).
+    Conflict between rule 62 and token MOD resolved as shift (GT < MOD).
+    Conflict between rule 62 and token AND resolved as reduce (AND < GT).
+    Conflict between rule 62 and token OR resolved as reduce (OR < GT).
+    Conflict between rule 62 and token LSHIFT resolved as shift (GT < LSHIFT).
+    Conflict between rule 62 and token RSHIFT resolved as shift (GT < RSHIFT).
+    Conflict between rule 62 and token XOR resolved as reduce (XOR < GT).
+
+
+State 132
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   63     | Expr LE Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, AND, OR, XOR]
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+
+    $default  reduce using rule 63 (Expr)
+
+    Conflict between rule 63 and token EQ resolved as reduce (EQ < LE).
+    Conflict between rule 63 and token GE resolved as reduce (%left GE).
+    Conflict between rule 63 and token GT resolved as reduce (%left GT).
+    Conflict between rule 63 and token LE resolved as reduce (%left LE).
+    Conflict between rule 63 and token LT resolved as reduce (%left LT).
+    Conflict between rule 63 and token NE resolved as reduce (NE < LE).
+    Conflict between rule 63 and token STAR resolved as shift (LE < STAR).
+    Conflict between rule 63 and token DIV resolved as shift (LE < DIV).
+    Conflict between rule 63 and token PLUS resolved as shift (LE < PLUS).
+    Conflict between rule 63 and token MINUS resolved as shift (LE < MINUS).
+    Conflict between rule 63 and token MOD resolved as shift (LE < MOD).
+    Conflict between rule 63 and token AND resolved as reduce (AND < LE).
+    Conflict between rule 63 and token OR resolved as reduce (OR < LE).
+    Conflict between rule 63 and token LSHIFT resolved as shift (LE < LSHIFT).
+    Conflict between rule 63 and token RSHIFT resolved as shift (LE < RSHIFT).
+    Conflict between rule 63 and token XOR resolved as reduce (XOR < LE).
+
+
+State 133
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   64     | Expr LT Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, AND, OR, XOR]
+   65     | Expr • NE Expr
+
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+
+    $default  reduce using rule 64 (Expr)
+
+    Conflict between rule 64 and token EQ resolved as reduce (EQ < LT).
+    Conflict between rule 64 and token GE resolved as reduce (%left GE).
+    Conflict between rule 64 and token GT resolved as reduce (%left GT).
+    Conflict between rule 64 and token LE resolved as reduce (%left LE).
+    Conflict between rule 64 and token LT resolved as reduce (%left LT).
+    Conflict between rule 64 and token NE resolved as reduce (NE < LT).
+    Conflict between rule 64 and token STAR resolved as shift (LT < STAR).
+    Conflict between rule 64 and token DIV resolved as shift (LT < DIV).
+    Conflict between rule 64 and token PLUS resolved as shift (LT < PLUS).
+    Conflict between rule 64 and token MINUS resolved as shift (LT < MINUS).
+    Conflict between rule 64 and token MOD resolved as shift (LT < MOD).
+    Conflict between rule 64 and token AND resolved as reduce (AND < LT).
+    Conflict between rule 64 and token OR resolved as reduce (OR < LT).
+    Conflict between rule 64 and token LSHIFT resolved as shift (LT < LSHIFT).
+    Conflict between rule 64 and token RSHIFT resolved as shift (LT < RSHIFT).
+    Conflict between rule 64 and token XOR resolved as reduce (XOR < LT).
+
+
+State 134
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+   65     | Expr NE Expr •  [RPAR, RSQ, EQ, NE, COMMA, SEMICOLON, AND, OR, XOR]
+
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+
+    $default  reduce using rule 65 (Expr)
+
+    Conflict between rule 65 and token EQ resolved as reduce (%left EQ).
+    Conflict between rule 65 and token GE resolved as shift (NE < GE).
+    Conflict between rule 65 and token GT resolved as shift (NE < GT).
+    Conflict between rule 65 and token LE resolved as shift (NE < LE).
+    Conflict between rule 65 and token LT resolved as shift (NE < LT).
+    Conflict between rule 65 and token NE resolved as reduce (%left NE).
+    Conflict between rule 65 and token STAR resolved as shift (NE < STAR).
+    Conflict between rule 65 and token DIV resolved as shift (NE < DIV).
+    Conflict between rule 65 and token PLUS resolved as shift (NE < PLUS).
+    Conflict between rule 65 and token MINUS resolved as shift (NE < MINUS).
+    Conflict between rule 65 and token MOD resolved as shift (NE < MOD).
+    Conflict between rule 65 and token AND resolved as reduce (AND < NE).
+    Conflict between rule 65 and token OR resolved as reduce (OR < NE).
+    Conflict between rule 65 and token LSHIFT resolved as shift (NE < LSHIFT).
+    Conflict between rule 65 and token RSHIFT resolved as shift (NE < RSHIFT).
+    Conflict between rule 65 and token XOR resolved as reduce (XOR < NE).
+
+
+State 135
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   52     | Expr STAR Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, STAR, DIV, PLUS, MINUS, MOD, AND, OR, LSHIFT, RSHIFT, XOR]
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    $default  reduce using rule 52 (Expr)
+
+    Conflict between rule 52 and token EQ resolved as reduce (EQ < STAR).
+    Conflict between rule 52 and token GE resolved as reduce (GE < STAR).
+    Conflict between rule 52 and token GT resolved as reduce (GT < STAR).
+    Conflict between rule 52 and token LE resolved as reduce (LE < STAR).
+    Conflict between rule 52 and token LT resolved as reduce (LT < STAR).
+    Conflict between rule 52 and token NE resolved as reduce (NE < STAR).
+    Conflict between rule 52 and token STAR resolved as reduce (%left STAR).
+    Conflict between rule 52 and token DIV resolved as reduce (%left DIV).
+    Conflict between rule 52 and token PLUS resolved as reduce (PLUS < STAR).
+    Conflict between rule 52 and token MINUS resolved as reduce (MINUS < STAR).
+    Conflict between rule 52 and token MOD resolved as reduce (%left MOD).
+    Conflict between rule 52 and token AND resolved as reduce (AND < STAR).
+    Conflict between rule 52 and token OR resolved as reduce (OR < STAR).
+    Conflict between rule 52 and token LSHIFT resolved as reduce (LSHIFT < STAR).
+    Conflict between rule 52 and token RSHIFT resolved as reduce (RSHIFT < STAR).
+    Conflict between rule 52 and token XOR resolved as reduce (XOR < STAR).
+
+
+State 136
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   53     | Expr DIV Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, STAR, DIV, PLUS, MINUS, MOD, AND, OR, LSHIFT, RSHIFT, XOR]
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    $default  reduce using rule 53 (Expr)
+
+    Conflict between rule 53 and token EQ resolved as reduce (EQ < DIV).
+    Conflict between rule 53 and token GE resolved as reduce (GE < DIV).
+    Conflict between rule 53 and token GT resolved as reduce (GT < DIV).
+    Conflict between rule 53 and token LE resolved as reduce (LE < DIV).
+    Conflict between rule 53 and token LT resolved as reduce (LT < DIV).
+    Conflict between rule 53 and token NE resolved as reduce (NE < DIV).
+    Conflict between rule 53 and token STAR resolved as reduce (%left STAR).
+    Conflict between rule 53 and token DIV resolved as reduce (%left DIV).
+    Conflict between rule 53 and token PLUS resolved as reduce (PLUS < DIV).
+    Conflict between rule 53 and token MINUS resolved as reduce (MINUS < DIV).
+    Conflict between rule 53 and token MOD resolved as reduce (%left MOD).
+    Conflict between rule 53 and token AND resolved as reduce (AND < DIV).
+    Conflict between rule 53 and token OR resolved as reduce (OR < DIV).
+    Conflict between rule 53 and token LSHIFT resolved as reduce (LSHIFT < DIV).
+    Conflict between rule 53 and token RSHIFT resolved as reduce (RSHIFT < DIV).
+    Conflict between rule 53 and token XOR resolved as reduce (XOR < DIV).
+
+
+State 137
+
+   50 Expr: Expr • PLUS Expr
+   50     | Expr PLUS Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, PLUS, MINUS, AND, OR, LSHIFT, RSHIFT, XOR]
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    STAR  shift, and go to state 103
+    DIV   shift, and go to state 104
+    MOD   shift, and go to state 107
+
+    $default  reduce using rule 50 (Expr)
+
+    Conflict between rule 50 and token EQ resolved as reduce (EQ < PLUS).
+    Conflict between rule 50 and token GE resolved as reduce (GE < PLUS).
+    Conflict between rule 50 and token GT resolved as reduce (GT < PLUS).
+    Conflict between rule 50 and token LE resolved as reduce (LE < PLUS).
+    Conflict between rule 50 and token LT resolved as reduce (LT < PLUS).
+    Conflict between rule 50 and token NE resolved as reduce (NE < PLUS).
+    Conflict between rule 50 and token STAR resolved as shift (PLUS < STAR).
+    Conflict between rule 50 and token DIV resolved as shift (PLUS < DIV).
+    Conflict between rule 50 and token PLUS resolved as reduce (%left PLUS).
+    Conflict between rule 50 and token MINUS resolved as reduce (%left MINUS).
+    Conflict between rule 50 and token MOD resolved as shift (PLUS < MOD).
+    Conflict between rule 50 and token AND resolved as reduce (AND < PLUS).
+    Conflict between rule 50 and token OR resolved as reduce (OR < PLUS).
+    Conflict between rule 50 and token LSHIFT resolved as reduce (LSHIFT < PLUS).
+    Conflict between rule 50 and token RSHIFT resolved as reduce (RSHIFT < PLUS).
+    Conflict between rule 50 and token XOR resolved as reduce (XOR < PLUS).
+
+
+State 138
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   51     | Expr MINUS Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, PLUS, MINUS, AND, OR, LSHIFT, RSHIFT, XOR]
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    STAR  shift, and go to state 103
+    DIV   shift, and go to state 104
+    MOD   shift, and go to state 107
+
+    $default  reduce using rule 51 (Expr)
+
+    Conflict between rule 51 and token EQ resolved as reduce (EQ < MINUS).
+    Conflict between rule 51 and token GE resolved as reduce (GE < MINUS).
+    Conflict between rule 51 and token GT resolved as reduce (GT < MINUS).
+    Conflict between rule 51 and token LE resolved as reduce (LE < MINUS).
+    Conflict between rule 51 and token LT resolved as reduce (LT < MINUS).
+    Conflict between rule 51 and token NE resolved as reduce (NE < MINUS).
+    Conflict between rule 51 and token STAR resolved as shift (MINUS < STAR).
+    Conflict between rule 51 and token DIV resolved as shift (MINUS < DIV).
+    Conflict between rule 51 and token PLUS resolved as reduce (%left PLUS).
+    Conflict between rule 51 and token MINUS resolved as reduce (%left MINUS).
+    Conflict between rule 51 and token MOD resolved as shift (MINUS < MOD).
+    Conflict between rule 51 and token AND resolved as reduce (AND < MINUS).
+    Conflict between rule 51 and token OR resolved as reduce (OR < MINUS).
+    Conflict between rule 51 and token LSHIFT resolved as reduce (LSHIFT < MINUS).
+    Conflict between rule 51 and token RSHIFT resolved as reduce (RSHIFT < MINUS).
+    Conflict between rule 51 and token XOR resolved as reduce (XOR < MINUS).
+
+
+State 139
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   54     | Expr MOD Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, STAR, DIV, PLUS, MINUS, MOD, AND, OR, LSHIFT, RSHIFT, XOR]
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    $default  reduce using rule 54 (Expr)
+
+    Conflict between rule 54 and token EQ resolved as reduce (EQ < MOD).
+    Conflict between rule 54 and token GE resolved as reduce (GE < MOD).
+    Conflict between rule 54 and token GT resolved as reduce (GT < MOD).
+    Conflict between rule 54 and token LE resolved as reduce (LE < MOD).
+    Conflict between rule 54 and token LT resolved as reduce (LT < MOD).
+    Conflict between rule 54 and token NE resolved as reduce (NE < MOD).
+    Conflict between rule 54 and token STAR resolved as reduce (%left STAR).
+    Conflict between rule 54 and token DIV resolved as reduce (%left DIV).
+    Conflict between rule 54 and token PLUS resolved as reduce (PLUS < MOD).
+    Conflict between rule 54 and token MINUS resolved as reduce (MINUS < MOD).
+    Conflict between rule 54 and token MOD resolved as reduce (%left MOD).
+    Conflict between rule 54 and token AND resolved as reduce (AND < MOD).
+    Conflict between rule 54 and token OR resolved as reduce (OR < MOD).
+    Conflict between rule 54 and token LSHIFT resolved as reduce (LSHIFT < MOD).
+    Conflict between rule 54 and token RSHIFT resolved as reduce (RSHIFT < MOD).
+    Conflict between rule 54 and token XOR resolved as reduce (XOR < MOD).
+
+
+State 140
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   55     | Expr AND Expr •  [RPAR, RSQ, COMMA, SEMICOLON, AND, OR]
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    EQ      shift, and go to state 96
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    NE      shift, and go to state 101
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+    XOR     shift, and go to state 112
+
+    $default  reduce using rule 55 (Expr)
+
+    Conflict between rule 55 and token EQ resolved as shift (AND < EQ).
+    Conflict between rule 55 and token GE resolved as shift (AND < GE).
+    Conflict between rule 55 and token GT resolved as shift (AND < GT).
+    Conflict between rule 55 and token LE resolved as shift (AND < LE).
+    Conflict between rule 55 and token LT resolved as shift (AND < LT).
+    Conflict between rule 55 and token NE resolved as shift (AND < NE).
+    Conflict between rule 55 and token STAR resolved as shift (AND < STAR).
+    Conflict between rule 55 and token DIV resolved as shift (AND < DIV).
+    Conflict between rule 55 and token PLUS resolved as shift (AND < PLUS).
+    Conflict between rule 55 and token MINUS resolved as shift (AND < MINUS).
+    Conflict between rule 55 and token MOD resolved as shift (AND < MOD).
+    Conflict between rule 55 and token AND resolved as reduce (%left AND).
+    Conflict between rule 55 and token OR resolved as reduce (OR < AND).
+    Conflict between rule 55 and token LSHIFT resolved as shift (AND < LSHIFT).
+    Conflict between rule 55 and token RSHIFT resolved as shift (AND < RSHIFT).
+    Conflict between rule 55 and token XOR resolved as shift (AND < XOR).
+
+
+State 141
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   56     | Expr OR Expr •  [RPAR, RSQ, COMMA, SEMICOLON, OR]
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    EQ      shift, and go to state 96
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    NE      shift, and go to state 101
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    AND     shift, and go to state 108
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+    XOR     shift, and go to state 112
+
+    $default  reduce using rule 56 (Expr)
+
+    Conflict between rule 56 and token EQ resolved as shift (OR < EQ).
+    Conflict between rule 56 and token GE resolved as shift (OR < GE).
+    Conflict between rule 56 and token GT resolved as shift (OR < GT).
+    Conflict between rule 56 and token LE resolved as shift (OR < LE).
+    Conflict between rule 56 and token LT resolved as shift (OR < LT).
+    Conflict between rule 56 and token NE resolved as shift (OR < NE).
+    Conflict between rule 56 and token STAR resolved as shift (OR < STAR).
+    Conflict between rule 56 and token DIV resolved as shift (OR < DIV).
+    Conflict between rule 56 and token PLUS resolved as shift (OR < PLUS).
+    Conflict between rule 56 and token MINUS resolved as shift (OR < MINUS).
+    Conflict between rule 56 and token MOD resolved as shift (OR < MOD).
+    Conflict between rule 56 and token AND resolved as shift (OR < AND).
+    Conflict between rule 56 and token OR resolved as reduce (%left OR).
+    Conflict between rule 56 and token LSHIFT resolved as shift (OR < LSHIFT).
+    Conflict between rule 56 and token RSHIFT resolved as shift (OR < RSHIFT).
+    Conflict between rule 56 and token XOR resolved as shift (OR < XOR).
+
+
+State 142
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   58     | Expr LSHIFT Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, AND, OR, LSHIFT, RSHIFT, XOR]
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    STAR   shift, and go to state 103
+    DIV    shift, and go to state 104
+    PLUS   shift, and go to state 105
+    MINUS  shift, and go to state 106
+    MOD    shift, and go to state 107
+
+    $default  reduce using rule 58 (Expr)
+
+    Conflict between rule 58 and token EQ resolved as reduce (EQ < LSHIFT).
+    Conflict between rule 58 and token GE resolved as reduce (GE < LSHIFT).
+    Conflict between rule 58 and token GT resolved as reduce (GT < LSHIFT).
+    Conflict between rule 58 and token LE resolved as reduce (LE < LSHIFT).
+    Conflict between rule 58 and token LT resolved as reduce (LT < LSHIFT).
+    Conflict between rule 58 and token NE resolved as reduce (NE < LSHIFT).
+    Conflict between rule 58 and token STAR resolved as shift (LSHIFT < STAR).
+    Conflict between rule 58 and token DIV resolved as shift (LSHIFT < DIV).
+    Conflict between rule 58 and token PLUS resolved as shift (LSHIFT < PLUS).
+    Conflict between rule 58 and token MINUS resolved as shift (LSHIFT < MINUS).
+    Conflict between rule 58 and token MOD resolved as shift (LSHIFT < MOD).
+    Conflict between rule 58 and token AND resolved as reduce (AND < LSHIFT).
+    Conflict between rule 58 and token OR resolved as reduce (OR < LSHIFT).
+    Conflict between rule 58 and token LSHIFT resolved as reduce (%left LSHIFT).
+    Conflict between rule 58 and token RSHIFT resolved as reduce (%left RSHIFT).
+    Conflict between rule 58 and token XOR resolved as reduce (XOR < LSHIFT).
+
+
+State 143
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   59     | Expr RSHIFT Expr •  [RPAR, RSQ, EQ, GE, GT, LE, LT, NE, COMMA, SEMICOLON, AND, OR, LSHIFT, RSHIFT, XOR]
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    STAR   shift, and go to state 103
+    DIV    shift, and go to state 104
+    PLUS   shift, and go to state 105
+    MINUS  shift, and go to state 106
+    MOD    shift, and go to state 107
+
+    $default  reduce using rule 59 (Expr)
+
+    Conflict between rule 59 and token EQ resolved as reduce (EQ < RSHIFT).
+    Conflict between rule 59 and token GE resolved as reduce (GE < RSHIFT).
+    Conflict between rule 59 and token GT resolved as reduce (GT < RSHIFT).
+    Conflict between rule 59 and token LE resolved as reduce (LE < RSHIFT).
+    Conflict between rule 59 and token LT resolved as reduce (LT < RSHIFT).
+    Conflict between rule 59 and token NE resolved as reduce (NE < RSHIFT).
+    Conflict between rule 59 and token STAR resolved as shift (RSHIFT < STAR).
+    Conflict between rule 59 and token DIV resolved as shift (RSHIFT < DIV).
+    Conflict between rule 59 and token PLUS resolved as shift (RSHIFT < PLUS).
+    Conflict between rule 59 and token MINUS resolved as shift (RSHIFT < MINUS).
+    Conflict between rule 59 and token MOD resolved as shift (RSHIFT < MOD).
+    Conflict between rule 59 and token AND resolved as reduce (AND < RSHIFT).
+    Conflict between rule 59 and token OR resolved as reduce (OR < RSHIFT).
+    Conflict between rule 59 and token LSHIFT resolved as reduce (%left LSHIFT).
+    Conflict between rule 59 and token RSHIFT resolved as reduce (%left RSHIFT).
+    Conflict between rule 59 and token XOR resolved as reduce (XOR < RSHIFT).
+
+
+State 144
+
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   57     | Expr XOR Expr •  [RPAR, RSQ, COMMA, SEMICOLON, AND, OR, XOR]
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    EQ      shift, and go to state 96
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    NE      shift, and go to state 101
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+
+    $default  reduce using rule 57 (Expr)
+
+    Conflict between rule 57 and token EQ resolved as shift (XOR < EQ).
+    Conflict between rule 57 and token GE resolved as shift (XOR < GE).
+    Conflict between rule 57 and token GT resolved as shift (XOR < GT).
+    Conflict between rule 57 and token LE resolved as shift (XOR < LE).
+    Conflict between rule 57 and token LT resolved as shift (XOR < LT).
+    Conflict between rule 57 and token NE resolved as shift (XOR < NE).
+    Conflict between rule 57 and token STAR resolved as shift (XOR < STAR).
+    Conflict between rule 57 and token DIV resolved as shift (XOR < DIV).
+    Conflict between rule 57 and token PLUS resolved as shift (XOR < PLUS).
+    Conflict between rule 57 and token MINUS resolved as shift (XOR < MINUS).
+    Conflict between rule 57 and token MOD resolved as shift (XOR < MOD).
+    Conflict between rule 57 and token AND resolved as reduce (AND < XOR).
+    Conflict between rule 57 and token OR resolved as reduce (OR < XOR).
+    Conflict between rule 57 and token LSHIFT resolved as shift (XOR < LSHIFT).
+    Conflict between rule 57 and token RSHIFT resolved as shift (XOR < RSHIFT).
+    Conflict between rule 57 and token XOR resolved as reduce (%left XOR).
+
+
+State 145
+
+   27 Statement: • LBRACE StatementList RBRACE
+   28          | • IF LPAR Expr RPAR Statement
+   29          | • IF LPAR Expr RPAR Statement ELSE Statement
+   30          | • WHILE LPAR Expr RPAR Statement
+   30          | WHILE LPAR Expr RPAR • Statement
+   31          | • RETURN SEMICOLON
+   32          | • RETURN Expr SEMICOLON
+   33          | • SEMICOLON
+   34          | • MethodInvocation SEMICOLON
+   35          | • Assignment SEMICOLON
+   36          | • ParseArgs SEMICOLON
+   37          | • PRINT LPAR Expr RPAR SEMICOLON
+   38          | • PRINT LPAR STRLIT RPAR SEMICOLON
+   39          | • error SEMICOLON
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+
+    error       shift, and go to state 38
+    LBRACE      shift, and go to state 39
+    SEMICOLON   shift, and go to state 41
+    IF          shift, and go to state 42
+    RETURN      shift, and go to state 43
+    WHILE       shift, and go to state 44
+    PRINT       shift, and go to state 45
+    PARSEINT    shift, and go to state 46
+    IDENTIFIER  shift, and go to state 47
+
+    Statement         go to state 155
+    MethodInvocation  go to state 51
+    Assignment        go to state 52
+    ParseArgs         go to state 53
+
+
+State 146
+
+   38 Statement: PRINT LPAR STRLIT RPAR • SEMICOLON
+
+    SEMICOLON  shift, and go to state 156
+
+
+State 147
+
+   37 Statement: PRINT LPAR Expr RPAR • SEMICOLON
+
+    SEMICOLON  shift, and go to state 157
+
+
+State 148
+
+   49 ParseArgs: PARSEINT LPAR error RPAR •
+
+    $default  reduce using rule 49 (ParseArgs)
+
+
+State 149
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   48          | PARSEINT LPAR IDENTIFIER LSQ • Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 158
+
+
+State 150
+
+   44 MethodInvocation: IDENTIFIER LPAR error RPAR •
+
+    $default  reduce using rule 44 (MethodInvocation)
+
+
+State 151
+
+   43 MethodInvocation: IDENTIFIER LPAR ArgList RPAR •
+
+    $default  reduce using rule 43 (MethodInvocation)
+
+
+State 152
+
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   46 ArgList: ArgList COMMA • Expr
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+   50 Expr: • Expr PLUS Expr
+   51     | • Expr MINUS Expr
+   52     | • Expr STAR Expr
+   53     | • Expr DIV Expr
+   54     | • Expr MOD Expr
+   55     | • Expr AND Expr
+   56     | • Expr OR Expr
+   57     | • Expr XOR Expr
+   58     | • Expr LSHIFT Expr
+   59     | • Expr RSHIFT Expr
+   60     | • Expr EQ Expr
+   61     | • Expr GE Expr
+   62     | • Expr GT Expr
+   63     | • Expr LE Expr
+   64     | • Expr LT Expr
+   65     | • Expr NE Expr
+   66     | • MINUS Expr
+   67     | • PLUS Expr
+   68     | • NOT Expr
+   69     | • LPAR Expr RPAR
+   70     | • LPAR error RPAR
+   71     | • MethodInvocation
+   72     | • Assignment
+   73     | • ParseArgs
+   74     | • IDENTIFIER
+   75     | • IDENTIFIER DOTLENGTH
+   76     | • NATURAL
+   77     | • DECIMAL
+   78     | • BOOLLIT
+
+    LPAR        shift, and go to state 63
+    NOT         shift, and go to state 64
+    PLUS        shift, and go to state 66
+    MINUS       shift, and go to state 67
+    PARSEINT    shift, and go to state 46
+    NATURAL     shift, and go to state 68
+    DECIMAL     shift, and go to state 69
+    IDENTIFIER  shift, and go to state 70
+    BOOLLIT     shift, and go to state 71
+
+    MethodInvocation  go to state 72
+    Assignment        go to state 73
+    ParseArgs         go to state 74
+    Expr              go to state 159
+
+
+State 153
+
+   26 VarDecl: Type IDENTIFIER IdentifierList SEMICOLON •
+
+    $default  reduce using rule 26 (VarDecl)
+
+
+State 154
+
+   28 Statement: IF LPAR Expr RPAR Statement •  [error, LBRACE, RBRACE, SEMICOLON, INT, DOUBLE, BOOL, IF, RETURN, WHILE, PRINT, PARSEINT, IDENTIFIER]
+   29          | IF LPAR Expr RPAR Statement • ELSE Statement
+
+    ELSE  shift, and go to state 160
+
+    $default  reduce using rule 28 (Statement)
+
+    Conflict between rule 28 and token ELSE resolved as shift (LOWER_THAN_ELSE < ELSE).
+
+
+State 155
+
+   30 Statement: WHILE LPAR Expr RPAR Statement •
+
+    $default  reduce using rule 30 (Statement)
+
+
+State 156
+
+   38 Statement: PRINT LPAR STRLIT RPAR SEMICOLON •
+
+    $default  reduce using rule 38 (Statement)
+
+
+State 157
+
+   37 Statement: PRINT LPAR Expr RPAR SEMICOLON •
+
+    $default  reduce using rule 37 (Statement)
+
+
+State 158
+
+   48 ParseArgs: PARSEINT LPAR IDENTIFIER LSQ Expr • RSQ RPAR
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    RSQ     shift, and go to state 161
+    EQ      shift, and go to state 96
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    NE      shift, and go to state 101
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    AND     shift, and go to state 108
+    OR      shift, and go to state 109
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+    XOR     shift, and go to state 112
+
+
+State 159
+
+   46 ArgList: ArgList COMMA Expr •  [RPAR, COMMA]
+   50 Expr: Expr • PLUS Expr
+   51     | Expr • MINUS Expr
+   52     | Expr • STAR Expr
+   53     | Expr • DIV Expr
+   54     | Expr • MOD Expr
+   55     | Expr • AND Expr
+   56     | Expr • OR Expr
+   57     | Expr • XOR Expr
+   58     | Expr • LSHIFT Expr
+   59     | Expr • RSHIFT Expr
+   60     | Expr • EQ Expr
+   61     | Expr • GE Expr
+   62     | Expr • GT Expr
+   63     | Expr • LE Expr
+   64     | Expr • LT Expr
+   65     | Expr • NE Expr
+
+    EQ      shift, and go to state 96
+    GE      shift, and go to state 97
+    GT      shift, and go to state 98
+    LE      shift, and go to state 99
+    LT      shift, and go to state 100
+    NE      shift, and go to state 101
+    STAR    shift, and go to state 103
+    DIV     shift, and go to state 104
+    PLUS    shift, and go to state 105
+    MINUS   shift, and go to state 106
+    MOD     shift, and go to state 107
+    AND     shift, and go to state 108
+    OR      shift, and go to state 109
+    LSHIFT  shift, and go to state 110
+    RSHIFT  shift, and go to state 111
+    XOR     shift, and go to state 112
+
+    $default  reduce using rule 46 (ArgList)
+
+
+State 160
+
+   27 Statement: • LBRACE StatementList RBRACE
+   28          | • IF LPAR Expr RPAR Statement
+   29          | • IF LPAR Expr RPAR Statement ELSE Statement
+   29          | IF LPAR Expr RPAR Statement ELSE • Statement
+   30          | • WHILE LPAR Expr RPAR Statement
+   31          | • RETURN SEMICOLON
+   32          | • RETURN Expr SEMICOLON
+   33          | • SEMICOLON
+   34          | • MethodInvocation SEMICOLON
+   35          | • Assignment SEMICOLON
+   36          | • ParseArgs SEMICOLON
+   37          | • PRINT LPAR Expr RPAR SEMICOLON
+   38          | • PRINT LPAR STRLIT RPAR SEMICOLON
+   39          | • error SEMICOLON
+   42 MethodInvocation: • IDENTIFIER LPAR RPAR
+   43                 | • IDENTIFIER LPAR ArgList RPAR
+   44                 | • IDENTIFIER LPAR error RPAR
+   47 Assignment: • IDENTIFIER ASSIGN Expr
+   48 ParseArgs: • PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR
+   49          | • PARSEINT LPAR error RPAR
+
+    error       shift, and go to state 38
+    LBRACE      shift, and go to state 39
+    SEMICOLON   shift, and go to state 41
+    IF          shift, and go to state 42
+    RETURN      shift, and go to state 43
+    WHILE       shift, and go to state 44
+    PRINT       shift, and go to state 45
+    PARSEINT    shift, and go to state 46
+    IDENTIFIER  shift, and go to state 47
+
+    Statement         go to state 162
+    MethodInvocation  go to state 51
+    Assignment        go to state 52
+    ParseArgs         go to state 53
+
+
+State 161
+
+   48 ParseArgs: PARSEINT LPAR IDENTIFIER LSQ Expr RSQ • RPAR
+
+    RPAR  shift, and go to state 163
+
+
+State 162
+
+   29 Statement: IF LPAR Expr RPAR Statement ELSE Statement •
+
+    $default  reduce using rule 29 (Statement)
+
+
+State 163
+
+   48 ParseArgs: PARSEINT LPAR IDENTIFIER LSQ Expr RSQ RPAR •
+
+    $default  reduce using rule 48 (ParseArgs)
