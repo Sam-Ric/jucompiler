@@ -14,7 +14,7 @@
 int temporary;
 static int label_counter = 1;
 static int current_is_main = 0;
-static const char *current_locals[256];
+static const char *current_locals[4096];
 static int current_local_count = 0;
 static int current_logical = 0;
 
@@ -74,7 +74,7 @@ static int is_global(const char *name) {
     return 0;
 }
 
-#define MAX_STRLITS 256
+#define MAX_STRLITS 2048
 static char *strlit_table[MAX_STRLITS];
 static int   strlit_count = 0;
 
@@ -162,7 +162,7 @@ int codegen_expression(struct node *expr, const char *args_name) {
         }
 
         case Decimal: {
-            char buf[256]; int j = 0;
+            char buf[2048]; int j = 0;
             for (int i = 0; expr->token[i]; i++)
                 if (expr->token[i] != '_') buf[j++] = expr->token[i];
             buf[j] = '\0';
@@ -174,7 +174,7 @@ int codegen_expression(struct node *expr, const char *args_name) {
                 *e_ptr = '\0';
             }
             
-            char formatted_mantissa[512];
+            char formatted_mantissa[4096];
             int len = strlen(buf);
             
             if (buf[0] == '.') {
@@ -426,17 +426,17 @@ int codegen_expression(struct node *expr, const char *args_name) {
             int num_args = countchildren(expr) - 1;
             enum type ret_type = expr->type;
 
-            char mangled_name[512];
+            char mangled_name[2048];
             strcpy(mangled_name, id_node->token);
             int is_call_real_main = (strcmp(id_node->token, "main") == 0 && id_node->param_sig && strcmp(id_node->param_sig, "(String[])") == 0);
 
-            enum type expected_types[128];
+            enum type expected_types[512];
             int num_expected = 0;
             
             if (id_node->param_sig && strlen(id_node->param_sig) > 2) {
-                char sig_copy[256];
-                strncpy(sig_copy, id_node->param_sig, 255);
-                sig_copy[255] = '\0';
+                char sig_copy[2048];
+                strncpy(sig_copy, id_node->param_sig, 2047);
+                sig_copy[2047] = '\0';
                 char *p = sig_copy + 1; /* skip '(' */
                 char *end = strchr(p, ')');
                 if (end) *end = '\0';
@@ -474,7 +474,7 @@ int codegen_expression(struct node *expr, const char *args_name) {
                     int argv_reg = temporary++;
                     printf("  %%%d = load i8**, i8*** %%%s.argv\n", argv_reg, arg->token);
                     
-                    char arg_str[256];
+                    char arg_str[2048];
                     if (i > 0) strcat(args_buf, ", ");
                     sprintf(arg_str, "i32 %%%d, i8** %%%d", argc_reg, argv_reg);
                     strcat(args_buf, arg_str);
@@ -489,7 +489,7 @@ int codegen_expression(struct node *expr, const char *args_name) {
                         actual_type = type_double;
                     }
 
-                    char arg_str[256];
+                    char arg_str[2048];
                     if (i > 0) strcat(args_buf, ", ");
                     sprintf(arg_str, "%s %%%d", type_to_llvm(actual_type), final_reg);
                     strcat(args_buf, arg_str);
@@ -685,7 +685,7 @@ static void codegen_function(struct node *method_decl) {
     int is_real_main = (strcmp(id_node->token, "main") == 0 && has_string_array);
     current_is_main = is_real_main;
     
-    char mangled_name[512];
+    char mangled_name[2048];
     strcpy(mangled_name, id_node->token);
 
     if (!is_real_main) {
