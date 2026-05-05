@@ -669,6 +669,23 @@ static void check_expression(struct node *expr, method_table *mt)
     }
 
     case Xor:
+    {
+        struct node *l = getchild(expr, 0);
+        struct node *r = getchild(expr, 1);
+        if ((l->type == type_int && r->type == type_int)) {
+            expr->type = type_int;
+        } else if (l->type == type_boolean && r->type == type_boolean) {
+            expr->type = type_boolean;
+        } else {
+            printf("Line %d, col %d: Operator %s cannot be applied to types %s, %s\n",
+                   expr->token_line, expr->token_column,
+                   get_op_string(expr->category),
+                   type_to_string(l->type), type_to_string(r->type));
+            sem_errors++;
+            expr->type = type_undef;
+        }
+        break;
+    }
     case Lshift:
     case Rshift:
     {
@@ -685,7 +702,7 @@ static void check_expression(struct node *expr, method_table *mt)
         expr->type = type_int;
         break;
     }
-
+    
     case Lt:
     case Gt:
     case Le:
