@@ -10,9 +10,8 @@
 #include "ast.h"
 #include "semantics.h"
 
-/* =========================================================================
-   TYPE UTILITIES
-   ========================================================================= */
+
+// TYPE UTILITIES
 
 static const char *type_names[] = {
     "int", "double", "boolean", "void", "String[]", "undef"};
@@ -108,16 +107,12 @@ static int param_name_exists_in_node(struct node *params_node, const char *name,
     return 0;
 }
 
-/* =========================================================================
-   GLOBAL STATE
-   ========================================================================= */
+// GLOBAL STATE
 
 class_table *gtable = NULL;
 static int sem_errors = 0;
 
-/* =========================================================================
-   PARAM-LIST HELPERS
-   ========================================================================= */
+// PARAM-LIST HELPERS
 
 static void add_param(param_entry **list, const char *type_str)
 {
@@ -146,7 +141,7 @@ static void free_params(param_entry *p)
     }
 }
 
-/* Builds "name(type1,type2)" -> caller must free the result"*/
+// Cria uma string do tipo "nome_metodo(type1,type2)" -> caller must free the result"
 static char *make_signature(const char *name, param_entry *params)
 {
     int len = strlen(name) + 3;
@@ -165,10 +160,9 @@ static char *make_signature(const char *name, param_entry *params)
     return sig;
 }
 
-/* =========================================================================
-   SYMBOL-TABLE HELPERS
-   ========================================================================= */
+// SYMBOL-TABLE HELPERS
 
+// Adiciona o simbolo à lista de simbolos.
 static symbol_entry *add_symbol(symbol_entry **list, const char *name,
                                 enum type t, int is_method, int is_param,
                                 int line, int col)
@@ -194,6 +188,7 @@ static symbol_entry *add_symbol(symbol_entry **list, const char *name,
     return s;
 }
 
+// Função auxiliar para encontrar o simbolo (fieldDecl ou MethodDecl) através do nome
 static symbol_entry *find_symbol(symbol_entry *list, const char *name)
 {
     for (symbol_entry *cur = list; cur; cur = cur->next)
@@ -202,6 +197,8 @@ static symbol_entry *find_symbol(symbol_entry *list, const char *name)
     return NULL;
 }
 
+//Função auxiliar para encontrar métodos por assinatura
+// Ou seja, recebe uma signature, tipo fatorial(int, int) e vê se está na lista de simbolos
 static symbol_entry *find_method_by_sig(symbol_entry *list,
                                         const char *name, param_entry *params)
 {
@@ -223,7 +220,7 @@ static symbol_entry *find_method_by_sig(symbol_entry *list,
     return NULL;
 }
 
-/* Non-method symbol: local scope first, then global */
+// Função auxiliar para procura de variáveis em tabelas de métodos
 static symbol_entry *find_variable(method_table *mt, const char *name)
 {
     symbol_entry *s = find_symbol(mt->symbols, name);
@@ -241,6 +238,7 @@ static symbol_entry *find_variable(method_table *mt, const char *name)
     return NULL;
 }
 
+// Função que ajuda a adicionar elementos à tabela de métodos
 static method_table *add_method_table(const char *name, const char *sig)
 {
     method_table *mt = malloc(sizeof(method_table));
@@ -260,10 +258,107 @@ static method_table *add_method_table(const char *name, const char *sig)
     return mt;
 }
 
-/* =========================================================================
-   PASS 1 – Build global class table
-   ========================================================================= */
+// PASSO 1 - Primeira passagem para consruir a tabela global
 
+static void process_field_decl(struct node *member) {
+    struct node *type_node = getchild(member, 0);
+    struct node *id_node = getchild(member, 1);
+    enum type v_type = category_to_type(type_node->category);
+
+    int already_defined = 0;
+    symbol_entry *s = gtable->symbols;
+    while (s)
+    {
+        // Procuramos os conflitos com variaveis globais e ignoramos os métodos
+        if (!s->is_method && strcmp(s->name, id_node->token) == 0)
+        {
+            already_defined = 1;
+            break;
+        }
+        s = s->next;
+    }
+
+    if (is_reserved_underscore(id_node->token))
+    {
+        printf("Line %d, col %d: Symbol _ is reserved\n", id_node->token_line, id_node->token_column);
+        sem_errors++;
+        member->type = type_undef;
+    }
+    else if (already_defined)
+    {
+        printf("Line %d, col %d: Symbol %s already defined\n", id_node->token_line, id_node->token_column, id_node->token);
+        sem_errors++;
+        member->type = type_undef;
+    }
+    else
+    {
+        add_symbol(&gtable->symbols, id_node->token, v_type, 0, 0, id_node->token_line, id_node->token_column);
+    }
+}
+
+static void process_method_decl(struct node * member) {
+    struct node *header = getchild(member, 0);
+    struct node *type_node = getchild(header, 0);
+    struct node *id_node = getchild(header, 1);
+    struct node *params_node = getchild(header, 2);
+    enum type ret = category_to_type(type_node->category);
+
+    /* Build parameter type list from MethodParams children */
+    param_entry *method_params = NULL;
+    int pidx = 0;
+    struct node *pd;
+    while ((pd = getchild(params_node, pidx++)) != NULL)
+    {
+        struct node *pt = getchild(pd, 0); /* type child of ParamDecl */
+        struct node *pid = getchild(pd, 1);
+        if (is_reserved_underscore(pid->token))
+        {
+            printf("Line %d, col %d: Symbol _ is reserved\n",
+                    pid->token_line, pid->token_column);
+            sem_errors++;
+        }
+        else if (param_name_exists_in_node(params_node, pid->token, pidx - 1))
+        {
+            printf("Line %d, col %d: Symbol %s already defined\n",
+                    pid->token_line, pid->token_column, pid->token);
+            sem_errors++;
+        }
+        add_param(&method_params,
+                    type_to_string(category_to_type(pt->category)));
+    }
+
+    if (is_reserved_underscore(id_node->token))
+    {
+        printf("Line %d, col %d: Symbol _ is reserved\n",
+                id_node->token_line, id_node->token_column);
+        sem_errors++;
+    }
+
+    else if (find_method_by_sig(gtable->symbols, id_node->token, method_params))
+    {
+        char *sig = make_signature(id_node->token, method_params);
+        printf("Line %d, col %d: Symbol %s already defined\n",
+                id_node->token_line, id_node->token_column, sig);
+        sem_errors++;
+        free(sig);
+        free_params(method_params);
+        member->type = type_undef;
+    }
+    else
+    {
+        symbol_entry *ms = add_symbol(&gtable->symbols, id_node->token, ret,
+                                        1, 0,
+                                        id_node->token_line, id_node->token_column);
+        ms->params = method_params;
+        char *sig = make_signature(id_node->token, method_params);
+        add_method_table(id_node->token, sig);
+        free(sig);
+    }
+}
+
+// A primeira passagem envolve logo a construção da tabela global
+// Ele guarda logo as variaveis globais existentes e os metodos no gtable, pq o java não necessita de declaraçao antes da chamada.
+// Para isto, basta percorrer a AST à procura de declaraçoes de métodos e fieldDecl.
 static void build_global_table(struct node *program)
 {
     struct node *class_id = getchild(program, 0);
@@ -272,8 +367,6 @@ static void build_global_table(struct node *program)
     gtable->symbols = NULL;
     gtable->methods = NULL;
 
-    /* Children of Program: [Identifier, FieldDecl|MethodDecl, …]
-       getchild(program, 0) is the class Identifier, so we start from index 1. */
     int idx = 1;
     struct node *member;
     while ((member = getchild(program, idx++)) != NULL)
@@ -281,140 +374,53 @@ static void build_global_table(struct node *program)
 
         if (member->category == FieldDecl)
         {
-            struct node *type_node = getchild(member, 0);
-            struct node *id_node = getchild(member, 1);
-            enum type v_type = category_to_type(type_node->category);
-
-            int already_defined = 0;
-            symbol_entry *s = gtable->symbols;
-            while (s)
-            {
-                // Procura conflitos APENAS com outras variáveis globais, ignora os métodos!
-                if (!s->is_method && strcmp(s->name, id_node->token) == 0)
-                {
-                    already_defined = 1;
-                    break;
-                }
-                s = s->next;
-            }
-
-            if (is_reserved_underscore(id_node->token))
-            {
-                printf("Line %d, col %d: Symbol _ is reserved\n", id_node->token_line, id_node->token_column);
-                sem_errors++;
-                member->type = type_undef;
-            }
-            else if (already_defined)
-            {
-                printf("Line %d, col %d: Symbol %s already defined\n", id_node->token_line, id_node->token_column, id_node->token);
-                sem_errors++;
-                member->type = type_undef;
-            }
-            else
-            {
-                add_symbol(&gtable->symbols, id_node->token, v_type, 0, 0, id_node->token_line, id_node->token_column);
-            }
+            process_field_decl(member);
         }
         else if (member->category == MethodDecl)
         {
-            struct node *header = getchild(member, 0);
-            struct node *type_node = getchild(header, 0);
-            struct node *id_node = getchild(header, 1);
-            struct node *params_node = getchild(header, 2);
-            enum type ret = category_to_type(type_node->category);
-
-            /* Build parameter type list from MethodParams children */
-            param_entry *method_params = NULL;
-            int pidx = 0;
-            struct node *pd;
-            while ((pd = getchild(params_node, pidx++)) != NULL)
-            {
-                struct node *pt = getchild(pd, 0); /* type child of ParamDecl */
-                struct node *pid = getchild(pd, 1);
-                if (is_reserved_underscore(pid->token))
-                {
-                    printf("Line %d, col %d: Symbol _ is reserved\n",
-                           pid->token_line, pid->token_column);
-                    sem_errors++;
-                }
-                else if (param_name_exists_in_node(params_node, pid->token, pidx - 1))
-                {
-                    printf("Line %d, col %d: Symbol %s already defined\n",
-                           pid->token_line, pid->token_column, pid->token);
-                    sem_errors++;
-                }
-                add_param(&method_params,
-                          type_to_string(category_to_type(pt->category)));
-            }
-
-            if (is_reserved_underscore(id_node->token))
-            {
-                printf("Line %d, col %d: Symbol _ is reserved\n",
-                       id_node->token_line, id_node->token_column);
-                sem_errors++;
-            }
-
-            else if (find_method_by_sig(gtable->symbols, id_node->token, method_params))
-            {
-                char *sig = make_signature(id_node->token, method_params);
-                printf("Line %d, col %d: Symbol %s already defined\n",
-                       id_node->token_line, id_node->token_column, sig);
-                sem_errors++;
-                free(sig);
-                free_params(method_params);
-                member->type = type_undef;
-            }
-            else
-            {
-                symbol_entry *ms = add_symbol(&gtable->symbols, id_node->token, ret,
-                                              1, 0,
-                                              id_node->token_line, id_node->token_column);
-                ms->params = method_params;
-                char *sig = make_signature(id_node->token, method_params);
-                add_method_table(id_node->token, sig);
-                free(sig);
-            }
+            process_method_decl(member);
         }
     }
 }
 
-/* =========================================================================
-   PASS 2 – Populate local method tables
-   ========================================================================= */
+// PASSO 2 - Popular as tabelas de métodos locais, com a sua propria informação tipo:
+// 
 
 static void populate_method_tables(struct node *program)
 {
+    // Ponteiro responsável por ir buscar métodos à lista ligada da informaçao dos métodos
     method_table *cur_mt = gtable->methods;
 
-    int idx = 1;
-    struct node *member;
-    while ((member = getchild(program, idx++)) != NULL)
+    int idx = 1; // Começa pelo idx 1 pq o idx 0 é o nome da classe
+    struct node *member; // Nó da arvore que vai ser analisado
+    while ((member = getchild(program, idx++)) != NULL) // Vai percorrendo sempre a AST pelos filhos
     {
-        if (member->category != MethodDecl || member->type == type_undef)
+        if (member->category != MethodDecl || member->type == type_undef) // Se não for um metodo ou nao tiver tipo definido, salta para o proximo
             continue;
 
-        struct node *header = getchild(member, 0);
+        struct node *header = getchild(member, 0); // Pega no cabeçalho da funçao para fazer extração de elementos
         struct node *type_node = getchild(header, 0);
         struct node *params_node = getchild(header, 2);
 
-        method_table *mt = cur_mt;
+        method_table *mt = cur_mt; // Guarda uma cópia da info do método que estamos a utilizar e o cur_mt salta logo para o proximo elemento
         if (!mt)
             break;
         cur_mt = cur_mt->next;
 
-        enum type ret = category_to_type(type_node->category);
-        add_symbol(&mt->symbols, "return", ret, 0, 0,
-                   type_node->token_line, type_node->token_column);
+        // Esta parte vai tratar do retorno da função.
+        enum type ret = category_to_type(type_node->category); // O type_node->category tem tipo "Int" e vai passar pra type_int, por ex.
+        add_symbol(&mt->symbols, "return", ret, 0, 0, type_node->token_line, type_node->token_column); // Adiciona à tabela local do método, o return
 
+        // Processamento dos parâmetros
         int pidx = 0;
-        struct node *pd;
-        while ((pd = getchild(params_node, pidx++)) != NULL)
+        struct node *pd; // Este nó vai corresponder aos parâmetros
+        while ((pd = getchild(params_node, pidx++)) != NULL) // Iteramos no a no pela lista de parametros
         {
-            struct node *pt = getchild(pd, 0);
-            struct node *pid = getchild(pd, 1);
-            enum type p_type = category_to_type(pt->category);
+            struct node *pt = getchild(pd, 0); // Parameter type
+            struct node *pid = getchild(pd, 1); // Parameter name
+            enum type p_type = category_to_type(pt->category); // Categoria do no. Mais uma vez Int -> type_int.
 
-            if (!is_reserved_underscore(pid->token) && !find_symbol(mt->symbols, pid->token))
+            if (!is_reserved_underscore(pid->token) && !find_symbol(mt->symbols, pid->token)) // Se não for nem um underscore nem estiver já na tabela local, adiciona à tabela local
             {
                 add_symbol(&mt->symbols, pid->token, p_type, 0, 1,
                            pid->token_line, pid->token_column);
@@ -423,10 +429,9 @@ static void populate_method_tables(struct node *program)
     }
 }
 
-/* =========================================================================
-   PASS 3 – Type checking
-   ========================================================================= */
+// Passo 3 - Type Checking
 
+// Funçao auxiliar que recebe o tipo de operaçao e retorna uma string da operação
 static const char *get_op_string(enum category c)
 {
     switch (c)
@@ -474,34 +479,138 @@ static const char *get_op_string(enum category c)
     }
 }
 
-static void check_expression(struct node *expr, method_table *mt);
-static void check_statement(struct node *stmt, method_table *mt);
+static void check_arithmetic_operation(struct node *expr) {
 
-static void check_expression(struct node *expr, method_table *mt)
-{
-    if (!expr)
-        return;
-
-    /* Post-order: type children before parent */
-    int cidx = 0;
-    struct node *child;
-    while ((child = getchild(expr, cidx)) != NULL)
+    // Vê se as operações aritméticas estão bem "feitas" digamos assim
+    struct node *l = getchild(expr, 0); // Peg ano lado esquerdo da operação
+    struct node *r = getchild(expr, 1); // Pega no lado direito da operação
+    if (!is_numeric(l->type) || !is_numeric(r->type)) // Se os tipos não forem ambos numéricos, dá logo erro
     {
-        if (expr->category == Call && cidx == 0)
-        {
-            cidx++;
-            continue;
-        }
-        check_expression(child, mt);
-        cidx++;
+        printf("Line %d, col %d: Operator %s cannot be applied to types %s, %s\n",
+                expr->token_line, expr->token_column,
+                get_op_string(expr->category),
+                type_to_string(l->type), type_to_string(r->type));
+        sem_errors++;
+        expr->type = type_undef;
+    }
+    else
+    {
+        expr->type = (l->type == type_double || r->type == type_double) // Se um deles for double, então fica double. Se não forem, n
+                            ? type_double
+                            : type_int;
+    }
+}
+
+static void resolve_method_call(struct node *expr) {
+    struct node *id_node = getchild(expr, 0);
+
+    // Vê se o nome da função é um underscore
+    if (is_reserved_underscore(id_node->token))
+    {
+        printf("Line %d, col %d: Symbol _ is reserved\n",
+                id_node->token_line, id_node->token_column);
+        sem_errors++;
+        expr->type = type_undef;
+        id_node->type = type_undef;
+        return;
     }
 
-    switch (expr->category)
-    {
 
-    case Natural:
+    int num_args = countchildren(expr) - 1;
+
+    enum type arg_types[128];
+    for (int i = 0; i < num_args && i < 128; i++)
+        arg_types[i] = getchild(expr, i + 1)->type;  // Vai buscar o tipo dos parâmetros e guarda-os num array.
+
+    symbol_entry *exact_match = NULL;
+    symbol_entry *compatible_match = NULL;
+    int compatible_count = 0;
+
+    for (symbol_entry *sym = gtable->symbols; sym; sym = sym->next)
     {
-        char buf[1024];
+        if (!sym->is_method || strcmp(sym->name, id_node->token) != 0) // Vai percorrer a lista de simbolos, ignorando tudo o que não é metodo e não tenha o nome da função a ser chamada
+            continue;
+
+        int num_params = 0;
+        for (param_entry *p = sym->params; p; p = p->next) // Verifica o número de parametros da função selecionada na lista de simbolos
+            num_params++;
+        if (num_params != num_args) // Se a chamada nao tiver o mesmo número de parâmetros da selecionada, passa ao proximo
+            continue;
+
+        // Aqui é preciso um match e compatibilidade. Isto porque, a função pode ser tipo fatorial(double, double) e receber int's como parâmetros
+        int is_exact = 1, is_comp = 1; // Assumimos que a method call é 100% compativel e um match exato
+        param_entry *p = sym->params; // Pegamos nos parametros do simbolo que estamos a analisar
+        for (int i = 0; i < num_args; i++, p = p->next)
+        {
+            enum type pt = string_to_type(p->type_str); // Verificamos o tipo do parâmetro
+            if (arg_types[i] != pt) // Se o tipo dos parametros da função chamada for diferente da função comparada, o match falha logo
+                is_exact = 0;
+            if (!is_compatible(arg_types[i], pt)) // Verificamos compatibilidade, tipo ints com doubles, etc. -> Se não for, zero
+                is_comp = 0;
+        }
+        if (is_exact) // Se for exato, retorna esse mesmo simbolo da lista.
+        {
+            exact_match = sym;
+            break;
+        }
+        if (is_comp) // Se for compativel, guarda a referencia. Precisa de armazenar o número de compatibilidade, isto pq pode haver metodos ambiguos e é preciso dar erro
+        {
+            compatible_match = sym;
+            compatible_count++;
+        }
+    }
+
+    if (exact_match) // Se for um exact match, ou seja, os tipos dos parametros exatamente igual aos da call:
+    {
+        expr->type = string_to_type(exact_match->type_str); // O nó da chamada assume o tipo de retorno do método
+        id_node->param_sig = make_signature("", exact_match->params); // Grava a assinatura do método
+        id_node->type = type_none; // O identificar fica como type_none, porque em Juc os métodos não têm tipo neles próprios, so no retorno
+    }
+    else if (compatible_count == 1) // Se for compatível
+    {
+        expr->type = string_to_type(compatible_match->type_str); // Igual à anterir
+        id_node->param_sig = make_signature("", compatible_match->params);
+        id_node->type = type_none;
+    }
+    else if (compatible_count > 1) // Se houver mais que um método que possa servir a chamada
+    {
+        param_entry *arg_list = NULL; // Cria uma lista para aparecer na mensagem de erro
+        for (int i = 0; i < num_args; i++)
+        {
+            add_param(&arg_list, type_to_string(getchild(expr, i + 1)->type));
+        }
+        char *sig = make_signature(id_node->token, arg_list); // Cria a assinatura para a mensagem de erro.
+
+        printf("Line %d, col %d: Reference to method %s is ambiguous\n",
+                id_node->token_line, id_node->token_column, sig);
+        sem_errors++;
+
+        free(sig);
+        free_params(arg_list);
+        expr->type = type_undef;
+        id_node->type = type_undef;
+    }
+    else // Simbolo nao foi encontrado
+    {
+        param_entry *attempted = NULL; // Guarda o tipo dos parametros para aparecer no erro e imprimir dps
+        for (int i = 0; i < num_args; i++)
+            add_param(&attempted, type_to_string(arg_types[i]));
+
+        char *sig = make_signature(id_node->token, attempted);
+        printf("Line %d, col %d: Cannot find symbol %s\n",
+                id_node->token_line, id_node->token_column, sig);
+        free(sig);
+
+        free_params(attempted);
+        sem_errors++;
+        expr->type = type_undef;
+        id_node->type = type_undef;
+    }
+}
+
+static void check_natural_exp(struct node *expr) {
+    // Faz a verificação para ver se o número natural é ok ou nao
+    char buf[1024];
         int j = 0;
         for (int i = 0; expr->token[i] != '\0'; i++)
         {
@@ -521,58 +630,96 @@ static void check_expression(struct node *expr, method_table *mt)
             sem_errors++;
         }
         expr->type = type_int;
+}
+
+static void check_decimal_expr(struct node *expr) {
+    // Faz a verificação para ver se o número decimal é ok ou nao
+    char buf[1024];
+    int j = 0;
+    for (int i = 0; expr->token[i] != '\0'; i++)
+    {
+        if (expr->token[i] != '_')
+        {
+            buf[j++] = expr->token[i];
+        }
+    }
+    buf[j] = '\0';
+
+    double val = strtod(buf, NULL);
+    int out_of_bounds = 0;
+
+    if (isinf(val))
+    {
+        out_of_bounds = 1;
+    }
+
+    else if (val == 0.0)
+    {
+        int is_zero = 1;
+
+        for (int i = 0; buf[i] != '\0'; i++)
+        {
+            if (buf[i] == 'e' || buf[i] == 'E')
+                break;
+            if (buf[i] >= '1' && buf[i] <= '9')
+            {
+                is_zero = 0;
+                break;
+            }
+        }
+
+        if (!is_zero)
+        {
+            out_of_bounds = 1;
+        }
+    }
+
+    if (out_of_bounds)
+    {
+        printf("Line %d, col %d: Number %s out of bounds\n",
+                expr->token_line, expr->token_column, expr->token);
+        sem_errors++;
+    }
+
+    expr->type = type_double;
+}
+
+static void check_expression(struct node *expr, method_table *mt)
+// Uma das funçoes mais importantes do analisador semântico, grande responsável pela análise das expressoes (type checking)
+// Começa das folhas, i.e, pelos nºs e variaveis, descobrindo os seus tipos pela tabela de simbolos
+// Depois sobe para o pai que é o operador e usa os tipos dos filhos para decidir o tipo dos pais.
+{
+    if (!expr)
+        return;
+
+    int cidx = 0;
+    struct node *child; 
+    // Este loop tem o objetivo de começar sempre pelos filhos do nó da expressão.
+    while ((child = getchild(expr, cidx)) != NULL)
+    {
+        // se for uma chamada, não chegou às folhas ainda, tem de ir mais "afundo" digamos
+        if (expr->category == Call && cidx == 0)
+        {
+            cidx++;
+            continue;
+        }
+        // recursividade para começar sempre pelos filhos
+        check_expression(child, mt);
+        cidx++;
+    }
+
+    // Vai fazer o devido type checking
+    switch (expr->category)
+    {
+
+    case Natural:
+    {
+        check_natural_exp(expr);
         break;
     }
     case Decimal:
     {
-        char buf[1024];
-        int j = 0;
-        for (int i = 0; expr->token[i] != '\0'; i++)
-        {
-            if (expr->token[i] != '_')
-            {
-                buf[j++] = expr->token[i];
-            }
-        }
-        buf[j] = '\0';
-
-        double val = strtod(buf, NULL);
-        int out_of_bounds = 0;
-
-        if (isinf(val))
-        {
-            out_of_bounds = 1;
-        }
-
-        else if (val == 0.0)
-        {
-            int is_zero = 1;
-
-            for (int i = 0; buf[i] != '\0'; i++)
-            {
-                if (buf[i] == 'e' || buf[i] == 'E')
-                    break;
-                if (buf[i] >= '1' && buf[i] <= '9')
-                {
-                    is_zero = 0;
-                    break;
-                }
-            }
-
-            if (!is_zero)
-            {
-                out_of_bounds = 1;
-            }
-        }
-
-        if (out_of_bounds)
-        {
-            printf("Line %d, col %d: Number %s out of bounds\n",
-                   expr->token_line, expr->token_column, expr->token);
-            sem_errors++;
-        }
-
-        expr->type = type_double;
+        check_decimal_expr(expr);
         break;
     }
 
@@ -648,26 +795,11 @@ static void check_expression(struct node *expr, method_table *mt)
     case Div:
     case Mod:
     {
-        struct node *l = getchild(expr, 0);
-        struct node *r = getchild(expr, 1);
-        if (!is_numeric(l->type) || !is_numeric(r->type))
-        {
-            printf("Line %d, col %d: Operator %s cannot be applied to types %s, %s\n",
-                   expr->token_line, expr->token_column,
-                   get_op_string(expr->category),
-                   type_to_string(l->type), type_to_string(r->type));
-            sem_errors++;
-            expr->type = type_undef;
-        }
-        else
-        {
-            expr->type = (l->type == type_double || r->type == type_double)
-                             ? type_double
-                             : type_int;
-        }
+        check_arithmetic_operation(expr);
         break;
     }
 
+    // Levou aqui uma pequena alteraçao neste XOR na Meta 4, para suportar operaçoes logicas de bits em booleans
     case Xor:
     {
         struct node *l = getchild(expr, 0);
@@ -702,7 +834,7 @@ static void check_expression(struct node *expr, method_table *mt)
         expr->type = type_int;
         break;
     }
-    
+
     case Lt:
     case Gt:
     case Le:
@@ -806,107 +938,7 @@ static void check_expression(struct node *expr, method_table *mt)
 
     case Call:
     {
-        struct node *id_node = getchild(expr, 0);
-
-        if (is_reserved_underscore(id_node->token))
-        {
-            printf("Line %d, col %d: Symbol _ is reserved\n",
-                   id_node->token_line, id_node->token_column);
-            sem_errors++;
-            expr->type = type_undef;
-            id_node->type = type_undef;
-            break;
-        }
-
-        int num_args = countchildren(expr) - 1;
-
-        enum type arg_types[128];
-        for (int i = 0; i < num_args && i < 128; i++)
-            arg_types[i] = getchild(expr, i + 1)->type;
-
-        symbol_entry *exact_match = NULL;
-        symbol_entry *compatible_match = NULL;
-        int compatible_count = 0;
-
-        for (symbol_entry *sym = gtable->symbols; sym; sym = sym->next)
-        {
-            if (!sym->is_method || strcmp(sym->name, id_node->token) != 0)
-                continue;
-
-            int num_params = 0;
-            for (param_entry *p = sym->params; p; p = p->next)
-                num_params++;
-            if (num_params != num_args)
-                continue;
-
-            int is_exact = 1, is_comp = 1;
-            param_entry *p = sym->params;
-            for (int i = 0; i < num_args; i++, p = p->next)
-            {
-                enum type pt = string_to_type(p->type_str);
-                if (arg_types[i] != pt)
-                    is_exact = 0;
-                if (!is_compatible(arg_types[i], pt))
-                    is_comp = 0;
-            }
-            if (is_exact)
-            {
-                exact_match = sym;
-                break;
-            }
-            if (is_comp)
-            {
-                compatible_match = sym;
-                compatible_count++;
-            }
-        }
-
-        if (exact_match)
-        {
-            expr->type = string_to_type(exact_match->type_str);
-            id_node->param_sig = make_signature("", exact_match->params);
-            id_node->type = type_none;
-        }
-        else if (compatible_count == 1)
-        {
-            expr->type = string_to_type(compatible_match->type_str);
-            id_node->param_sig = make_signature("", compatible_match->params);
-            id_node->type = type_none;
-        }
-        else if (compatible_count > 1)
-        {
-            param_entry *arg_list = NULL;
-            for (int i = 0; i < num_args; i++)
-            {
-                add_param(&arg_list, type_to_string(getchild(expr, i + 1)->type));
-            }
-            char *sig = make_signature(id_node->token, arg_list);
-
-            printf("Line %d, col %d: Reference to method %s is ambiguous\n",
-                   id_node->token_line, id_node->token_column, sig);
-            sem_errors++;
-
-            free(sig);
-            free_params(arg_list);
-            expr->type = type_undef;
-            id_node->type = type_undef;
-        }
-        else
-        {
-            param_entry *attempted = NULL;
-            for (int i = 0; i < num_args; i++)
-                add_param(&attempted, type_to_string(arg_types[i]));
-
-            char *sig = make_signature(id_node->token, attempted);
-            printf("Line %d, col %d: Cannot find symbol %s\n",
-                   id_node->token_line, id_node->token_column, sig);
-            free(sig);
-
-            free_params(attempted);
-            sem_errors++;
-            expr->type = type_undef;
-            id_node->type = type_undef;
-        }
+        resolve_method_call(expr);
         break;
     }
 
@@ -915,6 +947,7 @@ static void check_expression(struct node *expr, method_table *mt)
     }
 }
 
+// Em vez de ser para verificar os tipos das operações, etc, esta valida as regras dos ifs, returns, etc...
 static void check_statement(struct node *stmt, method_table *mt)
 {
     if (!stmt)
@@ -922,7 +955,8 @@ static void check_statement(struct node *stmt, method_table *mt)
 
     switch (stmt->category)
     {
-
+    
+    // Se a statement for do tipo block, tem de percorrer tudo lá dentro
     case Block:
     {
         int i = 0;
@@ -932,12 +966,15 @@ static void check_statement(struct node *stmt, method_table *mt)
         break;
     }
 
+
     case If:
     {
         struct node *cond = getchild(stmt, 0);
         struct node *then_stmt = getchild(stmt, 1);
         struct node *else_stmt = getchild(stmt, 2);
+        // Faz uma analise primeiro da condição do if, ver se os tipos batem, etc...
         check_expression(cond, mt);
+        // Se a condição resultante n for boolean, dá erro
         if (cond->type != type_boolean)
         {
             printf("Line %d, col %d: Incompatible type %s in if statement\n",
@@ -945,6 +982,7 @@ static void check_statement(struct node *stmt, method_table *mt)
                    type_to_string(cond->type));
             sem_errors++;
         }
+        // Verifica a statement do then e do else, por recursividade
         check_statement(then_stmt, mt);
         if (else_stmt)
             check_statement(else_stmt, mt);
@@ -953,6 +991,7 @@ static void check_statement(struct node *stmt, method_table *mt)
 
     case While:
     {
+        // O mesmo do if
         struct node *cond = getchild(stmt, 0);
         struct node *body = getchild(stmt, 1);
         check_expression(cond, mt);
@@ -969,22 +1008,25 @@ static void check_statement(struct node *stmt, method_table *mt)
 
     case Return:
     {
+        // Vai à tabela de simbolos buscar o return que anotámos e nomeamo-lo expected
         symbol_entry *ret_sym = find_symbol(mt->symbols, "return");
         enum type expected = ret_sym ? string_to_type(ret_sym->type_str) : type_void;
-        struct node *ret_expr = getchild(stmt, 0);
+        struct node *ret_expr = getchild(stmt, 0); // oq vem à frente do return
 
+        // Analisa a expressão que o utilizador escreveu no return
         if (ret_expr)
         {
             check_expression(ret_expr, mt);
             enum type actual = ret_expr->type;
-            if (expected == type_void)
+            //
+            if (expected == type_void) //se tiver algo a frente do return e for void, não funciona
             {
                 printf("Line %d, col %d: Incompatible type %s in return statement\n",
                        ret_expr->token_line, ret_expr->token_column,
                        type_to_string(actual));
                 sem_errors++;
             }
-            else if (!is_compatible(actual, expected))
+            else if (!is_compatible(actual, expected)) // Se o valor de retorno atual n for compativel com o expected, imcompativel
             {
                 printf("Line %d, col %d: Incompatible type %s in return statement\n",
                        ret_expr->token_line, ret_expr->token_column,
@@ -994,6 +1036,7 @@ static void check_statement(struct node *stmt, method_table *mt)
         }
         else
         {
+            // se não tiver valor à frente do return mas o expected n for void, então devia retornar algo
             if (expected != type_void)
             {
                 printf("Line %d, col %d: Incompatible type void in return statement\n",
@@ -1010,7 +1053,7 @@ static void check_statement(struct node *stmt, method_table *mt)
         if (child->category != StrLit)
         {
             check_expression(child, mt);
-            // Só aceita int, double e boolean. Tudo o resto (void, String[], undef) dá erro!
+            // Só aceita int, double e boolean. Tudo o resto (void, String[], undef) dá erro
             if (child->type != type_int && child->type != type_double && child->type != type_boolean)
             {
                 printf("Line %d, col %d: Incompatible type %s in System.out.print statement\n",
@@ -1037,16 +1080,18 @@ static void check_statement(struct node *stmt, method_table *mt)
 
 static void check_methods(struct node *program)
 {
+    // pega no conteudo das funçoes e vai analisa-los
     method_table *cur_mt = gtable->methods;
 
     int idx = 1;
     struct node *member;
-    while ((member = getchild(program, idx++)) != NULL)
+    while ((member = getchild(program, idx++)) != NULL) // vai percorrer a AST à procura de declaraçoes de metodos q não tenham problemas
     {
         if (member->category != MethodDecl || member->type == type_undef)
             continue;
 
-        struct node *body = getchild(member, 1);
+        
+        struct node *body = getchild(member, 1); // Pega no corpo da funçao
         method_table *mt = cur_mt;
         if (!mt)
             break;
@@ -1054,31 +1099,35 @@ static void check_methods(struct node *program)
 
         int sidx = 0;
         struct node *stmt;
-        while ((stmt = getchild(body, sidx++)) != NULL)
+        while ((stmt = getchild(body, sidx++)) != NULL) // Vai percorrer o corpo da funçao
         {
-
+            // Se for uma declaraçao de variavel, vai adicionar à tabela de simbolos/dar erro
             if (stmt->category == VarDecl)
             {
                 struct node *vt = getchild(stmt, 0);
                 struct node *vid = getchild(stmt, 1);
                 enum type v_type = category_to_type(vt->category);
+                // Verifica a definiçao de variaveis locais
                 if (is_reserved_underscore(vid->token))
                 {
                     printf("Line %d, col %d: Symbol _ is reserved\n", vid->token_line, vid->token_column);
                     sem_errors++;
                 }
+                // Verifica variaveis já declaradas
                 else if (find_symbol(mt->symbols, vid->token))
                 {
                     printf("Line %d, col %d: Symbol %s already defined\n",
                            vid->token_line, vid->token_column, vid->token);
                     sem_errors++;
                 }
+                // Se não adiciona à tabela do metodo
                 else
                 {
                     add_symbol(&mt->symbols, vid->token, v_type, 0, 0,
                                vid->token_line, vid->token_column);
                 }
             }
+            // Se não for, manda verificar
             else
             {
                 check_statement(stmt, mt);
@@ -1087,9 +1136,8 @@ static void check_methods(struct node *program)
     }
 }
 
-/* =========================================================================
-   OUTPUT – Symbol tables  (print_tables, called from main with -s)
-   ========================================================================= */
+// Funções para imprimir as tabelas e etc...
+
 
 static void print_class_table(void)
 {
@@ -1147,12 +1195,9 @@ void print_tables(void)
     }
 }
 
-/* =========================================================================
-   OUTPUT – Annotated AST  (show_annotated, called from main with -s)
-   Mirrors show() from ast.c but appends " - <type>" for expression nodes.
-   ========================================================================= */
+// Funções para imprimir a AST com algumas informaçoes a mais necessárias
 
-extern char *category_name[]; /* defined in ast.c via the names macro */
+extern char *category_name[];
 
 static int is_expr_node(enum category c)
 {
@@ -1228,9 +1273,7 @@ void show_annotated(struct node *node, int depth)
     }
 }
 
-/* =========================================================================
-   PUBLIC ENTRY POINT
-   ========================================================================= */
+// Basicamente é o q o lex chama para iniciar a análise semântica
 
 int semantic_analysis(struct node *program)
 {
