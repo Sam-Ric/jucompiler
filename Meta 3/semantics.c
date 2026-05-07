@@ -194,7 +194,7 @@ static char *make_signature(const char *name, param_entry *params)
 
 // SYMBOL-TABLE HELPERS
 
-// Adiciona o simbolo à lista de simbolos
+// Adiciona o simbolo à lista de simbolos.
 static symbol_entry *add_symbol(symbol_entry **list, const char *name,
                                 enum type t, int is_method, int is_param,
                                 int line, int col)
