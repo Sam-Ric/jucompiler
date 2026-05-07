@@ -8,28 +8,16 @@ Samuel Marques Riça (2023206471)
 
 #include "ast.h"
 
-/*
- * Run all three semantic passes (symbol-table construction + type checking).
- * Errors are printed to stdout as they are encountered.
- * Returns the total number of semantic errors found.
- */
+// Função pra correr a analise semantica toda
 int semantic_analysis(struct node *program);
 
-/*
- * Print all symbol tables to stdout.
- * Format: "===== Class/Method <sig> Symbol Table ====="
- * Must be called after semantic_analysis().
- */
+// Printa as tabelas de simbolo pro stdout
 void print_tables(void);
 
-/*
- * Print the annotated AST to stdout.
- * Expression nodes are annotated with " - <type>".
- * Must be called after semantic_analysis().
- */
+// Dá print à AST com as declaraçoes dos tipos e etc...
 void show_annotated(struct node *node, int depth);
 
-/* Utility exposed for use in jucompiler.y / code generation */
+// Pode ser util no codegen
 const char *type_to_string(enum type t);
 enum type   category_to_type(enum category c);
 
