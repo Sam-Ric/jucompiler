@@ -159,6 +159,45 @@ do símbolo `ExprOrAssign` descrito anteriormente.
         e garantindo que as declarações das mesmas acontecem antes das suas
         utilizações.
 
+
 ### iii) Geração de código
 
+A geração do código para LLVM é realizada percorrendo recursivamente a AST anotada
+após a análise semântica. Este processo é iniciado pela função `codegen_program`,
+que gere a tradução de toda a classe para LLVM.
 
+A estratégia de tradução assenta sobre um conjunto de funções, onde cada uma é
+responsável por traduzir uma parte específica da árvore:
+- `codegen_program`
+    Ponto inicial do processo de geração de código. Percorre a AST para declarar
+    as variáveis globais e recolher todos os nós `StrLit`, emitindo as definições
+    destas strings. Por fim itera sobre os métodos da classe (`MethodDecl`) para
+    gerar o código de cada método recorrendo à função `codegen_function`.
+- `codegen_function`
+    Traduz o código dos métodos da classe, identificados por `MethodDecl`, através
+    das seguintes etapas:
+    - gera a assinatura do método
+    - aloca espaço na stack para parâmetros e variáveis locais
+    - invoca a função `codegen_statement` para traduzir o corpo do método
+- `codegen_statement`
+    Traduz nós de statements como `IF`, `WHILE`, `RETURN`, `PRINT` e `ASSIGN`.
+- `codegen_expression`
+    Utiliza o sistema de registos virtuais (variável `temporary`) para gerar
+    código em formato SSA (Single Static Assignment). Para cada operação,
+    calcula os operandos recursivamente e emite a instrução LLVM correspondente,
+    devolvendo o número do registo que armazena o resultado.
+
+Tendo em conta que a linguagem Juc permite a funcionalidade de *method overloading*,
+implementámos um sistema de *name mangling*, através das funções `get_function_mangled_name`
+e `call_mangle_names` que transformam o nome do método numa assinatura única ao
+concatenar os tipos dos seus parâmetros (e.g. `soma(int,int)` torna-se `@soma.int.int`).
+
+Para o controlo de fluxo no caso de operadores como `If` e `While` e operadores
+lógicos como `&&` e `||`, recorremos a labels (`label`) e branches (`br`), que
+são utilizados para saltar entre blocos de código, implementando corretamente
+a lógica das condições e dos ciclos.
+
+Por fim, para distinguir entre variáveis globais, locais e parâmetros utilizamos
+funções auxiliares como `is_global` e `is_local`. Desta forma as instruções `load`
+e `store` conseguem aceder corretamente às variáveis, usando o prefixo `@` para
+globais e `%` para locais e parâmetros.
